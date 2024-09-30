@@ -20,7 +20,7 @@ parameters = {
     "repetition_penalty": 1
 }
 
-project_id = os.getenv("PROJECT_ID")  # Ensure PROJECT_ID is set in your environment
+project_id = "da2e1438-1e80-4b85-9c22-7565678d1498"  # Ensure PROJECT_ID is set in your environment
 space_id = os.getenv("SPACE_ID")      # Ensure SPACE_ID is set in your environment
 
 # Initialize the model once
