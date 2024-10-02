@@ -9,7 +9,7 @@ app = Flask(__name__)
 def get_credentials():
     return {
         "url": "https://eu-de.ml.cloud.ibm.com",
-        "apikey": getpass.getpass("Enter API key: ")  # Replace with a secure input or environment variable
+        "apikey":"3Ls5_sdF4uZz00i6ZdHGZB1YBxRDfVgcUgkq11tZvjlB" # Replace with a secure input or environment variable
     }
 
 # Define model parameters and environment variables

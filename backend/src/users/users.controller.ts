@@ -1,28 +1,39 @@
-import { Controller, Get, Post, Body, Param } from '@nestjs/common';
+// src/user/user.controller.ts
+import { Controller, Get, Param, Patch, Delete, Body, UseGuards, Request } from '@nestjs/common';
 import { UserService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
+  // Get details of the currently authenticated user
+  @UseGuards(JwtAuthGuard)
+  @Get('me')
+  async getProfile(@Request() req) {
+    const userId = req.user._id;
+    return this.userService.findById(userId);
   }
 
-  @Get()
-  findAll() {
-    return this.userService.findAll();
-  }
-
+  // Get user details by user ID (for admin purposes, for example)
   @Get(':id')
-  findOne(@Param('id') userId: string) {
-    return this.userService.findOne(userId);
+  async getUserById(@Param('id') id: string) {
+    return this.userService.findById(id);
   }
-  @Post("updateLevel")
-  updateLevel(@Body() UpdateUserDto:UpdateUserDto) {
-    return this.userService.updateLevel(UpdateUserDto);
+
+  // Update user information (name, password, etc.)
+  @UseGuards(JwtAuthGuard)
+  @Patch('me')
+  async updateUser(@Request() req, @Body() updateData: { name?: string; password?: string }) {
+    const userId = req.user._id;
+    return this.userService.updateUser(userId, updateData);
+  }
+
+  // Delete the authenticated user's account
+  @UseGuards(JwtAuthGuard)
+  @Delete('me')
+  async deleteUser(@Request() req) {
+    const userId = req.user._id;
+    return this.userService.deleteUser(userId);
   }
 }
