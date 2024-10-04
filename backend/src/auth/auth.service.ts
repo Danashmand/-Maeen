@@ -11,11 +11,12 @@ export class AuthService {
     private jwtService: JwtService
   ) {}
 
-  async signUp(email: string, password: string, name: string): Promise<User> {
-    return this.userService.createUser(email, password, name);
+  async signUp(email: string, password: string, name: string,level:string): Promise<User> {
+
+    return this.userService.createUser(email, password, name,level);
   }
 
-  async signIn(email: string, password: string): Promise<{ accessToken: string }> {
+  async signIn(email: string, password: string): Promise<{  userData: User }> {
     const user = await this.userService.findByEmail(email);
     if (!user || !(await this.userService.validatePassword(password, user.password))) {
       throw new UnauthorizedException('Invalid credentials');
@@ -23,7 +24,16 @@ export class AuthService {
 
     const payload = { email: user.email, sub: user._id };
     return {
-      accessToken: this.jwtService.sign(payload),
+    
+      userData: user, 
     };
+  }
+  async googleLogin(user: any) {
+    const payload = {
+      email: user.email,
+      sub: user._id, // You can use Google profile ID or another identifier
+    };
+
+    return this.jwtService.sign(payload);
   }
 }

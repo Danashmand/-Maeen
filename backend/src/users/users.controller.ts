@@ -1,5 +1,5 @@
 // src/user/user.controller.ts
-import { Controller, Get, Param, Patch, Delete, Body, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Param, Query, Patch, Delete, Body, UseGuards, Request } from '@nestjs/common';
 import { UserService } from './users.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
@@ -7,21 +7,32 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  // Get details of the currently authenticated user
   @UseGuards(JwtAuthGuard)
   @Get('me')
   async getProfile(@Request() req) {
     const userId = req.user._id;
-    return this.userService.findById(userId);
+
+    if (!userId) {
+      throw new Error('User ID not found in request.');
+    }
+
+    try {
+      const user = await this.userService.findById(userId);
+      if (!user) {
+        throw new Error('User not found.');
+      }
+      return user;
+    } catch (error) {
+      throw new Error(`Failed to fetch user profile: ${error.message}`);
+    }
   }
 
-  // Get user details by user ID (for admin purposes, for example)
-  @Get(':id')
-  async getUserById(@Param('id') id: string) {
-    return this.userService.findById(id);
+  // Updated endpoint to accept email as a query parameter
+  @Get('email')
+  async getUserByEmail(@Query('email') email: string) {
+    return this.userService.findByEmail(email);
   }
 
-  // Update user information (name, password, etc.)
   @UseGuards(JwtAuthGuard)
   @Patch('me')
   async updateUser(@Request() req, @Body() updateData: { name?: string; password?: string }) {
@@ -29,7 +40,6 @@ export class UserController {
     return this.userService.updateUser(userId, updateData);
   }
 
-  // Delete the authenticated user's account
   @UseGuards(JwtAuthGuard)
   @Delete('me')
   async deleteUser(@Request() req) {
