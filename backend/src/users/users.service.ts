@@ -8,7 +8,7 @@ import * as bcrypt from 'bcryptjs';
 @Injectable()
 export class UserService {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
-  async createUser(email: string, password: string, name: string): Promise<User> {
+  async createUser(email: string, password: string, name: string, level: any): Promise<User> {
     const existingUser = await this.userModel.findOne({ email });
     if (existingUser) {
       throw new BadRequestException('User already exists');
@@ -21,6 +21,15 @@ export class UserService {
 
   async findByEmail(email: string): Promise<User | null> {
     return this.userModel.findOne({ email });
+  }
+  async findByEmailGoogle(email: string): Promise<User | null> {
+    return this.userModel.findOne({ email }).exec();
+  }
+
+  // Create a new user
+  async createUserGoogle(userData: Partial<User>): Promise<User> {
+    const newUser = new this.userModel(userData);
+    return newUser.save();
   }
 
   async validatePassword(password: string, hashedPassword: string): Promise<boolean> {
