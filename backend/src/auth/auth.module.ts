@@ -5,7 +5,8 @@ import { PassportModule } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { UserModule } from '../users/users.module';
-import { JwtStrategy } from './jwt.strategy.ts';
+import { JwtStrategy } from './jwt.strategy';
+import { GoogleStrategy } from './google.strategy';
 
 @Module({
   imports: [
@@ -15,8 +16,9 @@ import { JwtStrategy } from './jwt.strategy.ts';
       secret: 'mySuperSecretKey', // Store securely in real apps
       signOptions: { expiresIn: '24h' },
     }),
+    PassportModule.register({ defaultStrategy: 'google' })
   ],
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService, JwtStrategy,GoogleStrategy],
   controllers: [AuthController],
 })
 export class AuthModule {}
