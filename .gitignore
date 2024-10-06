@@ -1,3 +1,7 @@
 .venv
+
+/myenv
+.chroma
+
 node_modules
 .env    
