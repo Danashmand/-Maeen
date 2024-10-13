@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsString } from 'class-validator';
 
-export class CreateChatDto {
+export class CreatevirtualTeacherDto {
   @IsNotEmpty()
   @IsString()
   readonly userId: string;
@@ -9,7 +9,6 @@ export class CreateChatDto {
   @IsString()
   readonly prompt: string;
 
-  @IsNotEmpty()
-  @IsString()
-  readonly answer: string;
+  
+
 }
