@@ -1,6 +1,7 @@
 .venv
 
 /myenv
+model/myenv
 .chroma
 
 node_modules

@@ -12,7 +12,7 @@ import string
 app = Flask(__name__)
 
 # Function to retrieve credentials
-# Function to retrieve credentials
+
 def get_credentials():
     return {
         "url": "https://eu-de.ml.cloud.ibm.com",
