@@ -32,9 +32,9 @@ const Sidebar = () => {
   ];
 
   return (
-    <div className="h-full m-8 w-56 bg-secondary rounded-3xl text-white flex flex-col p-1">
+    <div className="h-full m-8 w-56 bg-gradient-to-b from-primary to-secondary2 rounded-3xl text-white flex flex-col p-1 relative">
       {/* White brightness gradient */}
-      <div className="absolute top-0 m-8 left-0 right-0 h-24 w-64 rounded-3xl bg-gradient-to-b from-white/50 to-transparent"></div>
+      <div className="absolute top-0 m-0 left-0 right-0 h-24 w-64 rounded-3xl bg-gradient-to-b from-white/30 to-transparent"></div>
 
       {/* Logo with less space below */}
       <div className="text-center mb-1 mr-6"> {/* Reduced margin-bottom */}
