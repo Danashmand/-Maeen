@@ -1,14 +1,15 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsString, IsNotEmpty } from 'class-validator';
 
 export class CreatevirtualTeacherDto {
-  @IsNotEmpty()
   @IsString()
-  readonly userId: string;
-
   @IsNotEmpty()
+ readonly prompt: string;
+
   @IsString()
-  readonly prompt: string;
+  @IsNotEmpty()
+  readonly  userId: string;
 
-  
-
+  @IsString()
+  @IsNotEmpty()
+  readonly chatId: string;
 }

@@ -1,37 +1,29 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param } from '@nestjs/common';
 import { VirtualTeacherService } from './virtual-teacher.service';
 import { CreatevirtualTeacherDto } from './dto/create-virtualTeacher.dto';
-import { UpdateVirtualTeacherDto } from './dto/update-virtualTeacher.dto';
-
 @Controller('virtual-teacher')
-export class virtualTeacherController {
+export class VirtualTeacherController {
   constructor(private readonly virtualTeacherService: VirtualTeacherService) {}
 
+  @Post('start-session')
+  async startChatSession(@Body() body: { userId: string }) {
+    const ChatSesstion= await this.virtualTeacherService.startNewChatSession(body.userId);
+    console.log(ChatSesstion.chatId);
+    return {ChatId: ChatSesstion.chatId};
+  }
+
   @Post('ask')
-  async ask(@Body() body: { prompt: string, userId: string }) {
-    const { prompt, userId } = body;
-
-    // Send the user's question to the Flask server via the service
-    const answer = await this.virtualTeacherService.askQuestion(prompt, userId);
-
-    // Return the AI response
-    return { answer };
+  async ask(@Body() createvirtualTeacherDto: CreatevirtualTeacherDto) {
+    return this.virtualTeacherService.handleUserQuery(createvirtualTeacherDto);
   }
 
-  @Get()
-  findAll() {
-    return this.virtualTeacherService.findAll();
+  @Post('history')
+  async getChatHistory(@Body() body: { userId: string, chatId: string }) {
+    return this.virtualTeacherService.getChatHistory(body.userId, body.chatId);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.virtualTeacherService.findOne(id);
+  @Get(':chatId')
+  async getChatById(@Param('chatId') chatId: string) {
+    return this.virtualTeacherService.getChatById(chatId);
   }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateVirtualTeacherDto: UpdateVirtualTeacherDto) {
-    return this.virtualTeacherService.update(id, updateVirtualTeacherDto);
-  }
-
- 
 }
