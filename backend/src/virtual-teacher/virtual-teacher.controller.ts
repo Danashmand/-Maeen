@@ -21,6 +21,10 @@ export class VirtualTeacherController {
   async getChatHistory(@Body() body: { userId: string, chatId: string }) {
     return this.virtualTeacherService.getChatHistory(body.userId, body.chatId);
   }
+@Get('All')
+  async getAllChats(){
+    return this.virtualTeacherService.findAll();
+  }
 
   @Get(':chatId')
   async getChatById(@Param('chatId') chatId: string) {

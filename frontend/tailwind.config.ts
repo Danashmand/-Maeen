@@ -17,6 +17,11 @@ const config: Config = {
 
       },
     },
+    plugins: [
+      require('tailwind-scrollbar'),
+      // Optionally you can enable rounded scrollbars by using the following:
+      require('tailwind-scrollbar')({ nocompatible: true }),
+    ],
   },
   plugins: [],
 };

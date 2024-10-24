@@ -22,7 +22,6 @@ export class VirtualTeacherService {
     const chatId = `chat_${Date.now()}`; // Create a unique chatId (this should be a string)
     
     // Log the chatId to ensure it's being created correctly
-    console.log('Creating new chat session with chatId:', chatId);
   
     const newChatSession = new this.virtualTeacherModel({
       userId,
@@ -36,7 +35,6 @@ export class VirtualTeacherService {
       await newChatSession.save();
       return newChatSession;
     } catch (error) {
-      console.error('Error saving new chat session:', error);
       throw new Error('Failed to create new chat session');
     }
   }
@@ -118,5 +116,13 @@ export class VirtualTeacherService {
       console.error('Error communicating with the Flask server', error);
       throw new Error('Failed to get response from the Flask server');
     }
+  }
+
+
+  async findAll() {
+    const allChats= await this.virtualTeacherModel.find();
+    console.log(allChats);
+    return allChats;
+    
   }
 }
