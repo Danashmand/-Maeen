@@ -43,3 +43,22 @@ body {
 .animate-fade-in-up {
   animation: fade-in-up 0.4s ease-in-out;
 }
+/* Global CSS for scrollbars */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: #31295D; /* Track color */
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: '#972E7C'; /* Thumb color */
+  border-radius: 9999px; /* Rounded scrollbar */
+  border: 2px solid transparent; /* Space around scrollbar */
+}
+
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: #6756C3 #31295D; /* For Firefox */
+}

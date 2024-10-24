@@ -62,10 +62,9 @@ function Page() {
     const fetchChatHistory = async () => {
       if (userData || chatId) {
         try {
-          const response = await fetch("http://localhost:3000/virtual-teacher/history", {
-            method: "POST",
+          const response = await fetch("http://localhost:3000/virtual-teacher/All", {
+            method: "GET",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ userId: userData._id, chatId: chatId }),
           });
     
           if (!response.ok) {
@@ -75,15 +74,17 @@ function Page() {
           const data = await response.json();
     
           // Log the data to check its structure
-          console.log("Fetched chat history:", data);
     
           // Check if data is an array before mapping
           if (Array.isArray(data)) {
             const formattedHistory = data.map((chat) => ({
-              id: chat._id,
-              firstMessage: chat.prompt.substring(0, 7),
+              id: chat.chatId,
+              firstMessage: chat.messages[0] ? chat.messages[0].text.substring(0, 12) : '',
               date: new Date(chat.createdAt).toLocaleDateString(),
             }));
+          
+          
+          
             setChatHistory(formattedHistory);
           } else {
             console.error("Expected data to be an array but got:", data);
@@ -107,7 +108,6 @@ function Page() {
     setLoading(true);
 
     try {
-      console.log("Chat ID:", chatId);
 
       if (!chatId) {
         throw new Error("Chat ID is missing. Please start a new chat session.");
@@ -144,9 +144,19 @@ function Page() {
   };
 
   const handleChatClick = async (id: string) => {
-    const response = await fetch(`http://localhost:3000/virtual-teacher/${id}`);
-    const chatData = await response.json();
-    setChat(chatData.messages); // Assuming chatData.messages contains the messages
+    try {
+      const response = await fetch(`http://localhost:3000/virtual-teacher/${id}`);
+      const chatData = await response.json();
+  
+      const formattedMessages = chatData.messages.map((message: { text: string; source: string; }) => ({
+        prompt: message.text,
+        answer: message.source === 'chatbot' ? formatResponse(message.text) : '',
+      }));
+  
+      setChat(formattedMessages);
+    } catch (error) {
+      console.error("Error fetching chat data:", error);
+    }
   };
 
   const formatResponse = (response: string) => {
@@ -166,35 +176,36 @@ function Page() {
         <Sidebar />
       </div>
 
-      <div className="flex flex-col space-y-4 overflow-y-auto flex-grow bg-white/90 mb-5 mt-10 mr-64 bg-opacity-10 p-6 rounded-3xl shadow-xl backdrop-blur-md" dir="ltr">
-        <div className="flex flex-col space-y-4 overflow-y-auto flex-grow bg-white bg-opacity-10 p-6 max-h-[75vh] backdrop-blur-md" dir="rtl">
-          {chat.map((item, index) => (
-            <div key={index} className="flex flex-col">
-              <div className="flex items-center mb-2">
-                <Image src={StudentIcon} alt="Student Icon" className="w-8 h-8 rounded-full ml-2" />
-                <div className="bg-secondary2/90 p-3 rounded-xl text-white animate-fade-in-up text-lg leading-relaxed">
-                  {item.prompt}
-                </div>
-              </div>
-              {item.answer && (
-                <div className="flex items-center justify-end mt-2">
-                  <div className="bg-secondary p-3 w-3/5 rounded-xl text-white animate-fade-in-up text-xl leading-relaxed" dangerouslySetInnerHTML={{ __html: item.answer }} />
-                  <Image src={StudentIcon} alt="Teacher Icon" className="w-8 h-8 rounded-full mr-2" />
-                </div>
-              )}
-            </div>
-          ))}
-          {loading && <div className="self-end italic text-primary animate-pulse text-lg">المعلم يكتب  ...</div>}
-          <div ref={messagesEndRef} />
+      <div className="flex flex-col space-y-4 overflow-y-auto  bg-white/90 mb-5 mt-10 mr-1  w-[119vh] bg-opacity-10 p-6 rounded-3xl shadow-xl backdrop-blur-md " dir="ltr">
+  <div className="flex flex-col space-y-4 overflow-y-auto flex-grow bg-white bg-opacity-10 p-6 h-[75vh] backdrop-blur-md transition-transform duration-300 ease-in-out" dir="rtl">
+    {chat.map((item, index) => (
+      <div key={index} className="flex flex-col">
+        <div className="flex items-center mb-2">
+          <Image src={StudentIcon} alt="Student Icon" className="w-8 h-8 rounded-full ml-2" />
+          <div className="bg-secondary2/90 p-3 rounded-xl text-white animate-fade-in-up text-lg leading-relaxed max-w-[75%]">  {/* Added max-width */}
+            {item.prompt}
+          </div>
         </div>
-
-        <form onSubmit={handleSubmit} className="flex items-center space-x-4 pt-6">
-          <input type="text" className="flex-grow p-4 text-right rounded-full border-2 border-primary focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition duration-200 ease-in-out text-gray-900 bg-white text-lg leading-relaxed" placeholder="...اسأل شيئًا" value={userInput} onChange={(e) => setUserInput(e.target.value)} />
-          <button type="submit" className="bg-primary text-white rounded-full px-6 py-2 transition duration-200 ease-in-out hover:bg-secondary">
-            إرسال
-          </button>
-        </form>
+        {item.answer && (
+          <div className="flex items-center justify-end mt-2">
+            <div className="bg-secondary p-3 max-w-[75%] rounded-xl text-white animate-fade-in-up text-xl leading-relaxed" dangerouslySetInnerHTML={{ __html: item.answer }} />  {/* Added max-width */}
+            <Image src={StudentIcon} alt="Teacher Icon" className="w-8 h-8 rounded-full mr-2" />
+          </div>
+        )}
       </div>
+    ))}
+    {loading && <div className="self-end italic text-primary animate-pulse text-lg">المعلم يكتب  ...</div>}
+    <div ref={messagesEndRef} />
+  </div>
+
+  <form onSubmit={handleSubmit} className="flex items-center space-x-4 pt-6">
+    <input type="text" className="flex-grow p-4 text-right rounded-full border-2 border-primary focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition duration-200 ease-in-out text-gray-900 bg-white text-lg leading-relaxed" placeholder="...اسأل شيئًا" value={userInput} onChange={(e) => setUserInput(e.target.value)} />
+    <button type="submit" className="bg-primary text-white rounded-full px-6 py-2 transition duration-200 ease-in-out hover:bg-secondary">
+      إرسال
+    </button>
+  </form>
+</div>
+
       <RightSidebar chatHistory={chatHistory} onChatClick={handleChatClick} />
     </div>
   );
