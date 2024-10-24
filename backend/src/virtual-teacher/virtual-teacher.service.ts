@@ -1,62 +1,122 @@
-import { Injectable } from '@nestjs/common'; // Import only necessary modules
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { HttpService } from '@nestjs/axios'; // Import HttpService
+import { Injectable } from '@nestjs/common';
+import { VirtualTeacher, VirtualTeacherDocument } from './virtual-teacher.schema'; // Adjust the path as necessary
 import { CreatevirtualTeacherDto } from './dto/create-virtualTeacher.dto';
-import { UpdateVirtualTeacherDto } from './dto/update-virtualTeacher.dto';
-import { VirtualTeacher, VirtualTeacherDocument } from './virtual-teacher.schema';
-import { lastValueFrom } from 'rxjs'; // Allows handling async/await with observables
-import { AxiosResponse } from 'axios'; // Import AxiosResponse type
+import { Model } from 'mongoose';
+import { InjectModel } from '@nestjs/mongoose';
+import { HttpService } from '@nestjs/axios';
+import { AxiosResponse } from 'axios';
 
-// Define the expected response type from the Flask server
-interface AIResponse {
-  AI: string; // The key 'AI' holds the generated response
+interface ChatbotResponse {
+  AI: string;
 }
+import { lastValueFrom } from 'rxjs';
 
 @Injectable()
 export class VirtualTeacherService {
   constructor(
-    @InjectModel(VirtualTeacher.name) private virtualTeacherModel: Model<VirtualTeacherDocument>,
-    private httpService: HttpService // Inject HttpService instead of HttpServer
+    private readonly httpService: HttpService,
+    @InjectModel(VirtualTeacher.name)  private readonly virtualTeacherModel: Model<VirtualTeacherDocument>,
   ) {}
 
-  // Method to handle conversation with the Flask server
-  async askQuestion(prompt: string, userId: string): Promise<string> {
-    // Define the payload with the request body and headers
+  async startNewChatSession(userId: string) {
+    const chatId = `chat_${Date.now()}`; // Create a unique chatId (this should be a string)
+    
+    // Log the chatId to ensure it's being created correctly
+    console.log('Creating new chat session with chatId:', chatId);
+  
+    const newChatSession = new this.virtualTeacherModel({
+      userId,
+      chatId, // Ensure this is a string
+      messages: [], // Initialize messages as an empty array
+      createdAt: new Date(),
+    });
+  
+    // Attempt to save the new chat session and handle potential errors
+    try {
+      await newChatSession.save();
+      return newChatSession;
+    } catch (error) {
+      console.error('Error saving new chat session:', error);
+      throw new Error('Failed to create new chat session');
+    }
+  }
+  
+
+  async handleUserQuery(createvirtualTeacherDto: CreatevirtualTeacherDto) {
+    const { prompt, userId, chatId } = createvirtualTeacherDto;
+
+    // Generate chatbot response (use your existing method)
+    const chatbotResponse = await this.getChatbotResponse(prompt, userId);
+
+
+    const userMessage = {
+      text: prompt,
+      source: 'user' as 'user',
+      createdAt: new Date(),
+    };
+
+    const chatbotMessage = {
+      text: chatbotResponse,
+      source: 'chatbot' as 'chatbot',
+      createdAt: new Date(),
+    };
+
+    // Find the chat session by userId and chatId
+    const chatSession = await this.virtualTeacherModel.findOne({ userId, chatId });
+    if (chatSession) {
+      // Append the new messages
+      chatSession.messages.push(userMessage, chatbotMessage);
+      await chatSession.save();
+      return chatbotMessage;
+    } else {
+      throw new Error('Chat session not found');
+    }
+  }
+
+  // Retrieve chat history by chatId (or userId)
+  async getChatHistory(userId: string, chatId: string) {
+    if (!userId || !chatId) {
+      console.warn(`Invalid parameters: userId=${userId}, chatId=${chatId}. Returning empty array.`);
+      return []; // or return an appropriate default response
+  }
+    const chatSession = await this.virtualTeacherModel.findOne({ userId, chatId });
+  
+    if (chatSession) {
+      console.log("Chat session found:", chatSession);
+      return chatSession.messages;
+    } else {
+      console.warn("Chat session not found for userId:", userId, "and chatId:", chatId);
+      throw new Error('Chat session not found');
+    }
+  }
+  
+
+  async getChatById(chatId: string) {
+    return this.virtualTeacherModel.findOne({ chatId });
+  }
+  private async getChatbotResponse(prompt: string, userId: string): Promise<string> {
     const payload = {
-      question: prompt, // Flask API expects a 'question' field
+      question: prompt,
+      userId: userId, // Include userId in the payload if needed
     };
 
     try {
-      // Send POST request to the Flask server at the /ask endpoint
-      const response: AxiosResponse<AIResponse> = await lastValueFrom(
-        this.httpService.post<AIResponse>('http://localhost:5000/ask', payload, {
-          headers: { 'Content-Type': 'application/json' }, // Set the correct content type
-        }),
+      // Make the request to the Flask server
+      const response: AxiosResponse<ChatbotResponse> = await lastValueFrom(
+        this.httpService.post<ChatbotResponse>('http://localhost:5000/ask', payload, {
+          headers: { 'Content-Type': 'application/json' },
+        })
       );
 
-      // Return the AI's response from the Flask server
+      // Ensure response from AI is valid
+      if (!response.data || !response.data.AI) {
+        throw new Error('No response from AI');
+      }
+
       return response.data.AI;
     } catch (error) {
       console.error('Error communicating with the Flask server', error);
       throw new Error('Failed to get response from the Flask server');
     }
-  }
-
-  async create(createVirtualTeacherDto: CreatevirtualTeacherDto): Promise<VirtualTeacher> {
-    const createdVirtualTeacher = new this.virtualTeacherModel(createVirtualTeacherDto);
-    return createdVirtualTeacher.save();
-  }
-
-  async findAll(): Promise<VirtualTeacher[]> {
-    return this.virtualTeacherModel.find().exec();
-  }
-
-  async findOne(id: string): Promise<VirtualTeacher> {
-    return this.virtualTeacherModel.findById(id).exec();
-  }
-
-  async update(id: string, updateVirtualTeacherDto: UpdateVirtualTeacherDto): Promise<VirtualTeacher> {
-    return this.virtualTeacherModel.findByIdAndUpdate(id, updateVirtualTeacherDto, { new: true }).exec();
   }
 }
