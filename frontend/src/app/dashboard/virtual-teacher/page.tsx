@@ -4,21 +4,28 @@ import Sidebar from "@/app/_components/sidebar";
 import StudentIcon from "../../public/R.png";
 import Image from "next/image";
 import RightSidebar from "@/app/_components/rightSidebar";
+import { useRouter } from "next/navigation";
 
 function Page() {
-  const [chat, setChat] = useState<{ prompt: string; answer: string }[]>([]);
+const [chat, setChat] = useState<{
+    createdAt: string; prompt: string; answer: string 
+}[]>([]);
   const [loading, setLoading] = useState(false);
   const [userInput, setUserInput] = useState("");
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
   const [userData, setUserData] = useState<{ _id: string; name: string; email: string } | null>(null);
   const [chatHistory, setChatHistory] = useState<{ id: string; firstMessage: string; date: string }[]>([]);
   const [chatId, setChatId] = useState<string | null>(null);
-
+  const router = useRouter();
   useEffect(() => {
     const fetchUserData = async () => {
       const user = localStorage.getItem("user");
       if (user) {
         setUserData(JSON.parse(user));
+      }
+      else{
+        router.push('/auth/signin');
+
       }
     };
 
@@ -29,6 +36,7 @@ function Page() {
 
   useEffect(() => {
     const createNewChatSession = async () => {
+  
       try {
         const response = await fetch("http://localhost:3000/virtual-teacher/start-session", {
           method: "POST",
@@ -79,9 +87,9 @@ function Page() {
           if (Array.isArray(data)) {
             const formattedHistory = data.map((chat) => ({
               id: chat.chatId,
-              firstMessage: chat.messages[0] ? chat.messages[0].text.substring(0, 12) : '',
+              firstMessage: chat.messages[0] ? chat.messages[0].text.substring(0, 12) : 'Blank',
               date: new Date(chat.createdAt).toLocaleDateString(),
-            }));
+            })).reverse();
           
           
           
@@ -101,7 +109,7 @@ function Page() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const userPrompt = { prompt: userInput, answer: "" };
+    const userPrompt = { createdAt: new Date().toISOString(), prompt: userInput, answer: "" };
     setChat((prev) => [...prev, userPrompt]);
     setUserInput("");
 
@@ -148,16 +156,24 @@ function Page() {
       const response = await fetch(`http://localhost:3000/virtual-teacher/${id}`);
       const chatData = await response.json();
   
-      const formattedMessages = chatData.messages.map((message: { text: string; source: string; }) => ({
-        prompt: message.text,
-        answer: message.source === 'chatbot' ? formatResponse(message.text) : '',
-      }));
+      const formattedMessages = chatData.messages.map((message: { text: string; source: string; createdAt: Date }) => {
+        return {
+          text: message.text, // Keep the message text
+          source: message.source, // Keep the message source (user or chatbot)
+          createdAt: message.createdAt, // Include createdAt timestamp
+          prompt: message.source === 'user' ? message.text : null, // Keep the prompt if it's from the user
+          answer: message.source === 'chatbot' ? formatResponse(message.text) : null, // Keep the answer if it's from the chatbot
+        };
+      }).filter((message: { prompt: any; answer: any; }) => message.prompt || message.answer); // Filter out messages that are empty
   
-      setChat(formattedMessages);
+      setChat(formattedMessages); // Set the chat state with formatted messages
     } catch (error) {
       console.error("Error fetching chat data:", error);
     }
   };
+  
+  
+  
 
   const formatResponse = (response: string) => {
     return response
@@ -178,29 +194,35 @@ function Page() {
 
       <div className="flex flex-col space-y-4 overflow-y-auto  bg-white/90 mb-5 mt-10 mr-1  w-[119vh] bg-opacity-10 p-6 rounded-3xl shadow-xl backdrop-blur-md " dir="ltr">
   <div className="flex flex-col space-y-4 overflow-y-auto flex-grow bg-white bg-opacity-10 p-6 h-[75vh] backdrop-blur-md transition-transform duration-300 ease-in-out" dir="rtl">
-    {chat.map((item, index) => (
-      <div key={index} className="flex flex-col">
-        <div className="flex items-center mb-2">
-          <Image src={StudentIcon} alt="Student Icon" className="w-8 h-8 rounded-full ml-2" />
-          <div className="bg-secondary2/90 p-3 rounded-xl text-white animate-fade-in-up text-lg leading-relaxed max-w-[75%]">  {/* Added max-width */}
-            {item.prompt}
-          </div>
+  {chat.map((item, index) => (
+  <div key={index} className="flex flex-col">
+    {/* Render user's prompt */}
+    {item.prompt && item.prompt.trim() !== ""&& (
+      <div className="flex items-center mb-2">
+        <Image src={StudentIcon} alt="Student Icon" className="w-8 h-8 rounded-full ml-2" />
+        <div className="bg-secondary2/90 p-3 rounded-xl text-white animate-fade-in-up text-lg leading-relaxed max-w-[75%]">
+          {item.prompt}
         </div>
-        {item.answer && (
-          <div className="flex items-center justify-end mt-2">
-            <div className="bg-secondary p-3 max-w-[75%] rounded-xl text-white animate-fade-in-up text-xl leading-relaxed" dangerouslySetInnerHTML={{ __html: item.answer }} />  {/* Added max-width */}
-            <Image src={StudentIcon} alt="Teacher Icon" className="w-8 h-8 rounded-full mr-2" />
-          </div>
-        )}
       </div>
-    ))}
+    )}
+    {/* Render chatbot's answer */}
+    {item.answer && (
+      <div className="flex items-center justify-end mt-2">
+        <div className="bg-secondary p-3 max-w-[75%] rounded-xl text-white animate-fade-in-up text-xl leading-relaxed" dangerouslySetInnerHTML={{ __html: item.answer }} />
+        <Image src={StudentIcon} alt="Teacher Icon" className="w-8 h-8 rounded-full mr-2" />
+      </div>
+    )}
+   
+  </div>
+))}
+
     {loading && <div className="self-end italic text-primary animate-pulse text-lg">المعلم يكتب  ...</div>}
     <div ref={messagesEndRef} />
   </div>
 
   <form onSubmit={handleSubmit} className="flex items-center space-x-4 pt-6">
     <input type="text" className="flex-grow p-4 text-right rounded-full border-2 border-primary focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition duration-200 ease-in-out text-gray-900 bg-white text-lg leading-relaxed" placeholder="...اسأل شيئًا" value={userInput} onChange={(e) => setUserInput(e.target.value)} />
-    <button type="submit" className="bg-primary text-white rounded-full px-6 py-2 transition duration-200 ease-in-out hover:bg-secondary">
+    <button type="submit" className="bg-primary text-white rounded-full px-6 py-4 transition duration-200 ease-in-out hover:bg-secondary">
       إرسال
     </button>
   </form>

@@ -20,7 +20,7 @@ function Page() {
       localStorage.setItem("user", JSON.stringify(response.data));
 
       // Redirect to the dashboard
-      router.push("/dashboard");  // Uses Next.js navigation
+      router.push("/dashboard/virtual-teacher");  // Uses Next.js navigation
     } catch (error) {
       console.error("Error fetching user:", error);
     }
