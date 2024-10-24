@@ -20,7 +20,7 @@ const SignIn = () => {
       console.log('Login success:', response.data);
       // Store the JWT token in local storage
       localStorage.setItem('token', response.data.token); 
-      router.push('/dashboard'); 
+      router.push('/dashboard/virtual-teacher'); // Redirect to the dashboard
     } catch (error) {
       console.error('Login failed:', error);
     }

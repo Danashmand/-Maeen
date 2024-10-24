@@ -1,5 +1,6 @@
 "use client";
 import React from 'react';
+import { useRouter, usePathname } from 'next/navigation'; // Import useRouter and usePathname for routing
 import Logo from "../public/logo.svg"; 
 import Image from 'next/image';
 import DashboardIcon from '../public/sidebarIcons/dashboard.svg';
@@ -12,9 +13,12 @@ import Setting from "../public/sidebarIcons/setting.svg";
 import Logout from "../public/sidebarIcons/logout.svg";
 
 // Reusable Sidebar Item Component
-const SidebarItem = ({ icon: Icon, label, href }: { icon: React.FC, label: string, href?: string }) => (
+const SidebarItem = ({ icon: Icon, label, href, isActive }: { icon: React.FC, label: string, href?: string, isActive?: boolean }) => (
   <div>
-    <a href={href || "#"} className="flex ml-4 items-center space-x-2  hover:bg-secondary2 p-3 rounded-2xl"> 
+    <a 
+      href={href || "#"} 
+      className={`flex ml-4 items-center space-x-2 p-3 rounded-2xl ${isActive ? 'bg-secondary2' : 'hover:bg-secondary2'}`}
+    > 
       <Image className="w-6 h-6" alt='' src={Icon}/> 
       <span className='text-xl font-bold'>{label}</span>
     </a>
@@ -22,10 +26,13 @@ const SidebarItem = ({ icon: Icon, label, href }: { icon: React.FC, label: strin
 );
 
 const Sidebar = () => {
+  const router = useRouter(); // Get the current router
+  const currentPath = usePathname(); // Get the current pathname
+
   const sidebarItems = [
     { icon: DashboardIcon, label: "لوحة المعلومات", href: "/dashboard" },
     { icon: CashIcon, label: "مسارك التعليمي", href: "/dashboard/learning-path" },
-    { icon:  VectorIcon, label: "طور قرائتي", href: "/dashboard/comprehensive-lessons" }, 
+    { icon: VectorIcon, label: "طور قرائتي", href: "/dashboard/comprehensive-lessons" }, 
     { icon: AnnotationIcon, label: "مدرسك الإفتراضي", href: "/dashboard/virtual-teacher" },
     { icon: PencilIcon, label: "حسّن إملائك" },
     { icon: EqualCircleIcon, label: "اختبر نفسك" },
@@ -45,14 +52,20 @@ const Sidebar = () => {
       <nav className="flex-grow"> {/* Allow nav to take available space */}
         <ul className="space-y-1.5"> {/* Reduced space between items */}
           {sidebarItems.map((item, index) => (
-            <SidebarItem key={index} icon={item.icon} label={item.label} href="jdjd"/>
+            <SidebarItem 
+              key={index} 
+              icon={item.icon} 
+              label={item.label} 
+              href={item.href} 
+              isActive={currentPath === item.href} // Check if the current path matches the item's href
+            />
           ))}
         </ul>
       </nav>
 
       {/* Settings and Logout */}
       <div className='mt-auto'> {/* Push settings and logout to the bottom */}
-        <SidebarItem icon={Logout} label="تسجيل الخروج" href='../auth/signin'  />
+        <SidebarItem icon={Logout} label="تسجيل الخروج" href='../auth/signin' />
       </div>
     </div>
   );
