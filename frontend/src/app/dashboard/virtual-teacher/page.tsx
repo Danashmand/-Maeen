@@ -36,6 +36,7 @@ const [chat, setChat] = useState<{
 
   useEffect(() => {
     const createNewChatSession = async () => {
+  
       try {
         const response = await fetch("http://localhost:3000/virtual-teacher/start-session", {
           method: "POST",
@@ -86,7 +87,7 @@ const [chat, setChat] = useState<{
           if (Array.isArray(data)) {
             const formattedHistory = data.map((chat) => ({
               id: chat.chatId,
-              firstMessage: chat.messages[0] ? chat.messages[0].text.substring(0, 12) : '',
+              firstMessage: chat.messages[0] ? chat.messages[0].text.substring(0, 12) : 'Blank',
               date: new Date(chat.createdAt).toLocaleDateString(),
             })).reverse();
           
@@ -196,7 +197,7 @@ const [chat, setChat] = useState<{
   {chat.map((item, index) => (
   <div key={index} className="flex flex-col">
     {/* Render user's prompt */}
-    {item.prompt && (
+    {item.prompt && item.prompt.trim() !== ""&& (
       <div className="flex items-center mb-2">
         <Image src={StudentIcon} alt="Student Icon" className="w-8 h-8 rounded-full ml-2" />
         <div className="bg-secondary2/90 p-3 rounded-xl text-white animate-fade-in-up text-lg leading-relaxed max-w-[75%]">
