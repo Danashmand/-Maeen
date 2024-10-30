@@ -1,5 +1,6 @@
 import React from "react";
-
+import Logo from "../public/Group 367.png"; 
+import Image from "next/image";
 interface SidebarProps {
   chatHistory: { id: string; firstMessage: string; date: string }[];
   onChatClick: (id: string) => void;
@@ -7,9 +8,17 @@ interface SidebarProps {
 
 const RightSidebar: React.FC<SidebarProps> = ({ chatHistory, onChatClick }) => {
   return (
+    
     <div className="flex flex-col justify-start shadow-lg p-4 m-10 w-80 bg-gradient-to-b from-primary to-secondary2 rounded-3xl transition-transform duration-300 ease-out-in">
-      <h2 className="text-3xl font-bold mb-4 text-white text-center">المحادثات السابقة</h2>
-      <ul className="flex-1 overflow-y-auto scrollbar-thin">
+  <div className="flex  justify-end  items-center mb-1 mr-5">
+
+      <h2 className="text-3xl font-bold text-white text-center">محادثاتك السابقة</h2>
+      <Image src={Logo} alt="Logo" className="mx-2" />
+      <br />
+  
+  </div>
+      <hr className="my-3 border-2   " />
+      <ul className="flex-1 overflow-y-auto scrollbar-thin ">
         {chatHistory.map((chat) => (
           <li
             key={chat.id}

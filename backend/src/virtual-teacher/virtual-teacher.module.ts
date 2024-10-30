@@ -4,11 +4,13 @@ import { VirtualTeacherController } from './virtual-teacher.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { VirtualTeacherSchema } from './virtual-teacher.schema';
 import { HttpModule } from '@nestjs/axios';
+import { UserModule } from 'src/users/users.module';
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: 'VirtualTeacher', schema: VirtualTeacherSchema }]),
-    HttpModule
+    HttpModule,
+    UserModule
   ],
   controllers: [VirtualTeacherController],
   providers: [VirtualTeacherService],
