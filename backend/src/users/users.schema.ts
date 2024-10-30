@@ -17,6 +17,8 @@ export class User {
   name: string;
   @Prop()
   level: string;
+  @Prop()
+  score: number;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

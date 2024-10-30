@@ -5,6 +5,7 @@ import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { HttpService } from '@nestjs/axios';
 import { AxiosResponse } from 'axios';
+import { User, UserDocument } from '../users/users.schema'; // Adjust the path as necessary
 
 interface ChatbotResponse {
   AI: string;
@@ -16,6 +17,8 @@ export class VirtualTeacherService {
   constructor(
     private readonly httpService: HttpService,
     @InjectModel(VirtualTeacher.name)  private readonly virtualTeacherModel: Model<VirtualTeacherDocument>,
+    @InjectModel(User.name) private readonly userModel: Model<UserDocument>, 
+
   ) {}
 
   async startNewChatSession(userId: string) {
@@ -41,6 +44,7 @@ export class VirtualTeacherService {
   
 
   async handleUserQuery(createvirtualTeacherDto: CreatevirtualTeacherDto) {
+
     const { prompt, userId, chatId } = createvirtualTeacherDto;
 
     // Generate chatbot response (use your existing method)
@@ -65,12 +69,24 @@ export class VirtualTeacherService {
       // Append the new messages
       chatSession.messages.push(userMessage, chatbotMessage);
       await chatSession.save();
+      await this.updateUserScore(userId);
+
       return chatbotMessage;
     } else {
       throw new Error('Chat session not found');
     }
   }
-
+  private async updateUserScore(userId: string) {
+    // Find the user by userId
+    const user = await this.userModel.findById(userId);
+    if (user) {
+      // Increment the score by 10 points
+      user.score = (user.score || 0) + 10;
+      await user.save(); // Save the updated user document
+    } else {
+      throw new Error('User not found');
+    }
+  }
   // Retrieve chat history by chatId (or userId)
   async getChatHistory(userId: string, chatId: string) {
     if (!userId || !chatId) {
@@ -80,7 +96,6 @@ export class VirtualTeacherService {
     const chatSession = await this.virtualTeacherModel.findOne({ userId, chatId });
   
     if (chatSession) {
-      console.log("Chat session found:", chatSession);
       return chatSession.messages;
     } else {
       console.warn("Chat session not found for userId:", userId, "and chatId:", chatId);
@@ -121,7 +136,6 @@ export class VirtualTeacherService {
 
   async findAll() {
     const allChats= await this.virtualTeacherModel.find();
-    console.log(allChats);
     return allChats;
     
   }

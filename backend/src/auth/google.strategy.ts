@@ -29,7 +29,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       // Create new user if not found
       user = await this.userService.createUserGoogle({
         email: emails[0].value,
-        name: name.givenName + ' ' + name.familyName,
+        name: name.givenName ,
         password: '123456789',  // No password for Google users
         level: 'user', // Default level for new users (can be changed)
       });
