@@ -8,7 +8,6 @@ export class VirtualTeacherController {
   @Post('start-session')
   async startChatSession(@Body() body: { userId: string }) {
     const ChatSesstion= await this.virtualTeacherService.startNewChatSession(body.userId);
-    console.log(ChatSesstion.chatId);
     return {ChatId: ChatSesstion.chatId};
   }
 

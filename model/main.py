@@ -10,9 +10,7 @@ import random
 import string
 
 app = Flask(__name__)
-
 # Function to retrieve credentials
-
 def get_credentials():
     return {
         "url": "https://eu-de.ml.cloud.ibm.com",
@@ -51,7 +49,7 @@ model = Model(
     params=parameters,
     credentials=get_credentials(),
     project_id=project_id,
-    space_id=space_id 
+  
 )
 
 # Hydrate ChromaDB with your knowledge base vectors

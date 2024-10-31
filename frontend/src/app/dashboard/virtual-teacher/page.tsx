@@ -116,7 +116,7 @@ const [chat, setChat] = useState<{
     e.preventDefault();
   
     const userPrompt = { createdAt: new Date().toISOString(), prompt: userInput, answer: "" };
-    setChat((prev) => [...prev, userPrompt]);
+    setChat((prev) => [...prev, userPrompt]); 
     setUserInput("");
   
     if (userData) {
