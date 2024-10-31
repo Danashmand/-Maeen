@@ -1,14 +1,15 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { hostname } from 'os';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors({
-    origin: 'http://localhost:3001', // Replace with your frontend URL
+    origin: '*', 
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,  // Enable cookies and other credentials if needed
   });
   
-  await app.listen(3000);
+  await app.listen(3000, hostname: '0.0.0.0');
 }
 bootstrap();
