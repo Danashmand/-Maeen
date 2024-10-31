@@ -1,0 +1,10 @@
+# .nixpacks.toml
+[phases]
+[phases.install]
+cmd = "pnpm install"
+
+[phases.build]
+cmd = "pnpm run build"
+
+[phases.start]
+cmd = "pnpm run start:prod"
