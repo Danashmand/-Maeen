@@ -10,6 +10,6 @@ async function bootstrap() {
     credentials: true,  // Enable cookies and other credentials if needed
   });
   
-  await app.listen(3000, '0.0.0.0');
+  await app.listen(process.env.PORT, '0.0.0.0');
 }
 bootstrap();
