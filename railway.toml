@@ -5,7 +5,7 @@ name = "backend"
 # Service configuration for the backend
 [[services]]
 name = "backend"
-path = "backend/"
+path = "backend"
 
 # Set up the install, build, and start commands
 [services.deploy]
