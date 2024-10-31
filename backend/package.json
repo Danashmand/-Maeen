@@ -32,6 +32,7 @@
     "axios": "^1.7.7",
     "bcryptjs": "^2.4.3",
     "class-validator": "^0.14.1",
+    "cors": "^2.8.5",
     "mongoose": "^8.7.0",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",

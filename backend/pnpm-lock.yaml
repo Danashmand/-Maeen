@@ -44,6 +44,9 @@ importers:
       class-validator:
         specifier: ^0.14.1
         version: 0.14.1
+      cors:
+        specifier: ^2.8.5
+        version: 2.8.5
       mongoose:
         specifier: ^8.7.0
         version: 8.7.0
