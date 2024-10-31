@@ -116,7 +116,7 @@ export class VirtualTeacherService {
     try {
       // Make the request to the Flask server
       const response: AxiosResponse<ChatbotResponse> = await lastValueFrom(
-        this.httpService.post<ChatbotResponse>('http://localhost:5000/ask', payload, {
+        this.httpService.post<ChatbotResponse>('http://www.maeenmodelserver.site/ask', payload, {
           headers: { 'Content-Type': 'application/json' },
         })
       );
