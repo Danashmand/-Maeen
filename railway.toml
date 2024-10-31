@@ -1,0 +1,17 @@
+# railway.toml
+[project]
+name = "backend"
+
+# Service configuration for the backend
+[[services]]
+name = "backend"
+path = "backend/"
+
+# Set up the install, build, and start commands
+[services.deploy]
+# Install dependencies using pnpm (or npm/yarn if you're not using pnpm)
+installCommand = "pnpm install"
+# Build the NestJS app
+buildCommand = "pnpm run build"
+# Start the NestJS app
+startCommand = "pnpm run start"
