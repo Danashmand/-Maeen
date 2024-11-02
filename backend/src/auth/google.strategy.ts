@@ -12,7 +12,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     private userService: UserService  // Inject the UserService
   ) {
     super({
-      clientID: configService.get<string>('GOOGLE_CLIENT_ID'),
+      clientID: configService.get<string>('GOOGLE_CLIENT_ID') ,
       clientSecret: configService.get<string>('GOOGLE_CLIENT_SECRET'),
       callbackURL: 'https://maeen-production.up.railway.app/auth/google/redirect',
       scope: ['email', 'profile'],

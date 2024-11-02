@@ -11,20 +11,21 @@ function Page() {
     event.preventDefault();
     const emailInput = document.getElementById("email") as HTMLInputElement;
     const email = emailInput.value;
-
+  
     try {
       const response = await axios.get(`https://maeen-production.up.railway.app/users/email?email=${email}`);
       console.log("Login success:", response.data);
-
-      // Store the user data in localStorage as a string
-      localStorage.setItem("user", JSON.stringify(response.data));
-
+  
+      // Store the user data in localStorage with consistent structure
+      localStorage.setItem("user", JSON.stringify({ userData: response.data }));
+  
       // Redirect to the dashboard
       router.push("/dashboard/virtual-teacher");  // Uses Next.js navigation
     } catch (error) {
       console.error("Error fetching user:", error);
     }
   };
+  
 
   return (
     <div className="relative h-screen w-full overflow-hidden text-right">

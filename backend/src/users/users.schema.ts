@@ -17,7 +17,7 @@ export class User {
   name: string;
   @Prop()
   level: string;
-  @Prop()
+  @Prop({default: 0})
   score: number;
 }
 

@@ -27,16 +27,16 @@ const [chat, setChat] = useState<{
       const user = localStorage.getItem("user");
       if (!user) {
         router.push('/auth/signin');
-      }
-      else{
-        setUserData(JSON.parse(user));
-        console.log(user);
-
+      } else {
+        const parsedUser = JSON.parse(user).userData;
+        setUserData(parsedUser);
+        console.log(parsedUser);
       }
     };
-
+  
     fetchUserData();
   }, []);
+  
 
 
 
@@ -74,9 +74,9 @@ const [chat, setChat] = useState<{
   }, [userData]);
   useEffect(() => {
     const fetchChatHistory = async () => {
-      if (userData || chatId) {
+      if (userData && userData._id) { // Ensure userData and user ID are available
         try {
-          const response = await fetch("https://maeen-production.up.railway.app/virtual-teacher/All", {
+          const response = await fetch(`https://maeen-production.up.railway.app/virtual-teacher/chats/user/${userData._id}`, {
             method: "GET",
             headers: { "Content-Type": "application/json" },
           });
@@ -88,6 +88,7 @@ const [chat, setChat] = useState<{
           const data = await response.json();
     
           // Log the data to check its structure
+          console.log(data); 
     
           // Check if data is an array before mapping
           if (Array.isArray(data)) {
@@ -96,9 +97,7 @@ const [chat, setChat] = useState<{
               firstMessage: chat.messages[0] ? chat.messages[0].text.substring(0, 12) : 'Blank',
               date: new Date(chat.createdAt).toLocaleDateString(),
             })).reverse();
-          
-          
-          
+    
             setChatHistory(formattedHistory);
           } else {
             console.error("Expected data to be an array but got:", data);
@@ -108,6 +107,7 @@ const [chat, setChat] = useState<{
         }
       }
     };
+    
     
 
     fetchChatHistory();

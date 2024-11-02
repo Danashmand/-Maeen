@@ -17,7 +17,9 @@ const SignIn = () => {
         email,
         password,
       });
-      console.log('Login success:', response.data);
+      console.log('Login success:', JSON.stringify(response.data));
+      localStorage.setItem("user", JSON.stringify(response.data ));
+  
       // Store the JWT token in local storage
       localStorage.setItem('token', response.data.token); 
       router.push('/dashboard/virtual-teacher'); // Redirect to the dashboard
@@ -25,6 +27,7 @@ const SignIn = () => {
       console.error('Login failed:', error);
     }
   };
+  
 
   // Handle Google sign-in redirect
   const handleGoogleSignIn = () => {

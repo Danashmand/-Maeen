@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { VirtualTeacher, VirtualTeacherDocument } from './virtual-teacher.schema'; // Adjust the path as necessary
 import { CreatevirtualTeacherDto } from './dto/create-virtualTeacher.dto';
 import { Model } from 'mongoose';
@@ -139,4 +139,14 @@ export class VirtualTeacherService {
     return allChats;
     
   }
+  async findChatsByUserId(userId: string) {
+    const chatHistory = await this.virtualTeacherModel.find({ userId }); // Assuming `userId` is a field in your chat model
+    if (!chatHistory || chatHistory.length === 0) {
+      throw new NotFoundException(`No chat history found for user ID ${userId}`);
+    }
+    return chatHistory;
+  }
+  
+
+  
 }

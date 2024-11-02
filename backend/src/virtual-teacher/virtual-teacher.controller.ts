@@ -29,4 +29,9 @@ export class VirtualTeacherController {
   async getChatById(@Param('chatId') chatId: string) {
     return this.virtualTeacherService.getChatById(chatId);
   }
+  @Get('chats/user/:userId')
+async getChatsByUserId(@Param('userId') userId: string) {
+  return this.virtualTeacherService.findChatsByUserId(userId);
+}
+
 }

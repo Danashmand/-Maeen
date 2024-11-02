@@ -8,14 +8,14 @@ import * as bcrypt from 'bcryptjs';
 @Injectable()
 export class UserService {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
-  async createUser(email: string, password: string, name: string, level: any): Promise<User> {
+  async createUser(email: string, password: string, name: string, level: any, score: number = 0): Promise<User> {
     const existingUser = await this.userModel.findOne({ email });
     if (existingUser) {
       throw new BadRequestException('User already exists');
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new this.userModel({ email, password: hashedPassword, name });
+    const user = new this.userModel({ email, password: hashedPassword, name, level, score }); 
     return user.save();
   }
 
@@ -45,7 +45,7 @@ export class UserService {
   }
 
   // Update user data (name or password)
-  async updateUser(id: string, updateData: { name?: string; password?: string , level?:string }): Promise<User> {
+  async updateUser(id: string, updateData: { name?: string; password?: string , level?:string ,score?:number }): Promise<User> {
     const user = await this.findById(id);
     if (updateData.password) {
       updateData.password = await bcrypt.hash(updateData.password, 10);
