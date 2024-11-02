@@ -13,7 +13,7 @@ function Page() {
     const email = emailInput.value;
 
     try {
-      const response = await axios.get(`http://localhost:3000/users/email?email=${email}`);
+      const response = await axios.get(`https://maeen-production.up.railway.app/users/email?email=${email}`);
       console.log("Login success:", response.data);
 
       // Store the user data in localStorage as a string

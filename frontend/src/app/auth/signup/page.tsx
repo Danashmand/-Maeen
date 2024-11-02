@@ -14,7 +14,7 @@ const SignUp = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:3000/auth/signup', {
+      const response = await axios.post('https://maeen-production.up.railway.app/auth/signup', {
         email,
         password,
         name,

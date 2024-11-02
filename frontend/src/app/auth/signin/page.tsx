@@ -13,7 +13,7 @@ const SignIn = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:3000/auth/signin', {
+      const response = await axios.post('https://maeen-production.up.railway.app/auth/signin', {
         email,
         password,
       });
@@ -28,7 +28,7 @@ const SignIn = () => {
 
   // Handle Google sign-in redirect
   const handleGoogleSignIn = () => {
-    window.location.href = 'http://localhost:3000/auth/google'; // Google OAuth route
+    window.location.href = 'https://maeen-production.up.railway.app/auth/google'; // Google OAuth route
   };
 
   return (

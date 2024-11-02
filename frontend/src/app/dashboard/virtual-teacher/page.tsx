@@ -44,7 +44,7 @@ const [chat, setChat] = useState<{
     const createNewChatSession = async () => {
   
       try {
-        const response = await fetch("http://maeen-production.up.railway.app/virtual-teacher/start-session", {
+        const response = await fetch("https://maeen-production.up.railway.app/virtual-teacher/start-session", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ userId: userData?._id }),
@@ -76,7 +76,7 @@ const [chat, setChat] = useState<{
     const fetchChatHistory = async () => {
       if (userData || chatId) {
         try {
-          const response = await fetch("http://maeen-production.up.railway.app/virtual-teacher/All", {
+          const response = await fetch("https://maeen-production.up.railway.app/virtual-teacher/All", {
             method: "GET",
             headers: { "Content-Type": "application/json" },
           });
@@ -139,7 +139,7 @@ const [chat, setChat] = useState<{
         throw new Error("Chat ID is missing. Please start a new chat session.");
       }
   
-      const response = await fetch("http://maeen-production.up.railway.app/virtual-teacher/ask", {
+      const response = await fetch("https://maeen-production.up.railway.app/virtual-teacher/ask", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -189,7 +189,7 @@ const [chat, setChat] = useState<{
   
   const handleChatClick = async (id: string) => {
     try {
-      const response = await fetch(`http://maeen-production.up.railway.app/virtual-teacher/${id}`);
+      const response = await fetch(`https://maeen-production.up.railway.app/virtual-teacher/${id}`);
       const chatData = await response.json();
   
       const formattedMessages = chatData.messages.map((message: { text: string; source: string; createdAt: Date }) => {

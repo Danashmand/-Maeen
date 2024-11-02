@@ -35,7 +35,7 @@ export class AuthController {
   async googleAuthRedirect(@Req() req, @Res() res) {
     const jwt = await this.authService.googleLogin(req.user);
     res.cookie('user', jwt, { httpOnly: true });  // Example of setting a cookie
-    res.redirect(`http://localhost:3001/auth/getmail`); // Redirect to dashboard  res.redirect
+    res.redirect(`http://localhost:3000/auth/getmail`); // Redirect to dashboard  res.redirect
   
   }
 }
