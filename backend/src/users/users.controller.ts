@@ -1,5 +1,5 @@
 // src/user/user.controller.ts
-import { Controller, Get, Param, Query, Patch, Delete, Body, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Param, Query, Patch, Delete, Body, UseGuards, Request, Post } from '@nestjs/common';
 import { UserService } from './users.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
@@ -45,5 +45,10 @@ export class UserController {
   async deleteUser(@Request() req) {
     const userId = req.user._id;
     return this.userService.deleteUser(userId);
+  }
+
+  @Post('update-user-level')
+  async updateUserLevel(@Body() body: { userId: string, score: number }) {
+    return this.userService.updateUserLevel(body.userId, body.score);
   }
 }

@@ -46,7 +46,7 @@ const Exam: React.FC<ExamProps> = ({ questions, showCorrectAnswer = true, onComp
 
   return (
     <div className="flex flex-col justify-center items-center font-sans p-7 bg-gray-50 rounded-md shadow-lg max-w-lg mx-auto" dir="rtl">
-      <h2 className="mb-4 text-lg font-medium text-center text-primary">
+      <h2 className="mb-4 text-2xl font-medium text-center text-primary">
         {currentQuestion.question}
       </h2>
       <div className="flex flex-col gap-3 w-full">

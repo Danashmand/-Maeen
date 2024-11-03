@@ -1,11 +1,14 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Exam from '../_components/exam';
 import Image from 'next/image';
 import background from '../public/images/Desktop - 4 (1).png';
 import { useRouter } from 'next/navigation';
+import axios from 'axios';
 const Page = () => {
     const router = useRouter();
+    const [userData, setUserData] = useState<{ _id: string; name: string; email: string, score: number } | null>(null);
+
   const questions = [
     {
       id: 1,
@@ -60,11 +63,42 @@ const Page = () => {
   ];
 
   const [score, setScore] = useState<number | null>(null);
-
-  const handleComplete = (finalScore: number) => {
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const user = localStorage.getItem("user");
+      if (!user) {
+        router.push('/auth/signin');
+      } else {
+        const parsedUser = JSON.parse(user).userData;
+        setUserData(parsedUser);
+      }
+    };
+  
+    fetchUserData();
+  }, []);
+  
+ async function handleComplete(finalScore: number): Promise<void> {
     setScore(finalScore);
-    router.push('/dashboard/virtual-teacher');
-  };
+    console.log('Final Score:', finalScore);
+
+    try {
+        // Send score to backend to update user level
+        const response = await axios.post('https://maeen-production.up.railway.app/users/update-user-level', {
+          userId: userData?._id,
+          score: finalScore,
+        });
+  
+        console.log('User Level Updated:', response.data);
+        
+        // Optionally redirect to the dashboard or display a success message
+        router.push('/dashboard/virtual-teacher');
+      } catch (error) {
+        console.error('Error updating user level:', error);
+        // Handle the error (e.g., show an error message to the user)
+      }
+      // router.push('/dashboard/virtual-teacher');
+    };
+
 
   return (
     <div className="relative  h-screen w-full overflow-hidden text-right  ">

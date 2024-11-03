@@ -7,7 +7,7 @@ import RightSidebar from "@/app/_components/rightSidebar";
 import { useRouter } from "next/navigation";
 import LogoColored from '../../public/logocolored.svg'
 import Face from "../../public/face.svg";
-
+// import background from '../../public/images/Desktop - 4 (1).png';
 function Page() {
 const [chat, setChat] = useState<{
     createdAt: string; prompt: string; answer: string 
@@ -30,7 +30,6 @@ const [chat, setChat] = useState<{
       } else {
         const parsedUser = JSON.parse(user).userData;
         setUserData(parsedUser);
-        console.log(parsedUser);
       }
     };
   
@@ -228,7 +227,14 @@ const [chat, setChat] = useState<{
     scrollToBottom();
   }, [chat]);
   return (
-    <div className="h-screen flex flex-row bg-gradient-to-r bg-white/95">
+       <div className="relative  h-screen flex flex-roww-full overflow-hidden text-right bg-white/95  ">
+{/*         
+        <Image
+          src={background}
+          alt="Background Cover"
+          fill
+          className="-z-10 object-center object-cover  "
+        /> */}
       <div className="mb-20">
         <Sidebar userData={userData}  />
       </div>

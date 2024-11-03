@@ -62,4 +62,24 @@ export class UserService {
     }
     return { message: 'User deleted successfully' };
   }
+  async updateUserLevel(userId: string, score: number) {
+    const user = await this.userModel.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Determine level based on the score received from the frontend
+    if (score <= 2) {
+      user.level = 'beginner';
+    } else if (score > 2 && score < 5) {
+      user.level = 'intermediate';
+    } else if (score === 5) {
+      user.level = 'expert';
+    } else {
+      user.level = 'undefined'; // Fallback, if needed
+    }
+
+    await user.save();
+    return { userId: user._id, level: user.level };
+  }
 }
