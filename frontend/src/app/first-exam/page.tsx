@@ -1,0 +1,94 @@
+"use client";
+import React, { useState } from 'react';
+import Exam from '../_components/exam';
+import Image from 'next/image';
+import background from '../public/images/Desktop - 4 (1).png';
+import { useRouter } from 'next/navigation';
+const Page = () => {
+    const router = useRouter();
+  const questions = [
+    {
+      id: 1,
+      question: 'أي من هذه الكلمات هي اسم فاكهة بالعربية؟',
+      options: [
+        { id: 1, text: 'تفاحة', correct: true },
+        { id: 2, text: 'كرسي', correct: false },
+        { id: 3, text: 'كتاب', correct: false },
+        { id: 4, text: 'قمر', correct: false }
+      ]
+    },
+    {
+      id: 2,
+      question: 'ما هو عكس كلمة طويل؟',
+      options: [
+        { id: 1, text: 'قصير', correct: true },
+        { id: 2, text: 'ثقيل', correct: false },
+        { id: 3, text: 'واسع', correct: false },
+        { id: 4, text: 'بطيء', correct: false }
+      ]
+    },
+    {
+      id: 3,
+      question: 'أي من هذه الألوان يعتبر لونًا دافئًا؟',
+      options: [
+        { id: 1, text: 'أزرق', correct: false },
+        { id: 2, text: 'أحمر', correct: true },
+        { id: 3, text: 'أخضر', correct: false },
+        { id: 4, text: 'أرجواني', correct: false }
+      ]
+    },
+    {
+      id: 4,
+      question: 'أي من هذه الحيوانات يطير؟',
+      options: [
+        { id: 1, text: 'قط', correct: false },
+        { id: 2, text: 'فراشة', correct: true },
+        { id: 3, text: 'حصان', correct: false },
+        { id: 4, text: 'سمكة', correct: false }
+      ]
+    },
+    {
+      id: 5,
+      question: 'أي من هذه الكلمات هو اسم آلة؟',
+      options: [
+        { id: 1, text: 'سيارة', correct: true },
+        { id: 2, text: 'بحر', correct: false },
+        { id: 3, text: 'شجرة', correct: false },
+        { id: 4, text: 'جبل', correct: false }
+      ]
+    }
+  ];
+
+  const [score, setScore] = useState<number | null>(null);
+
+  const handleComplete = (finalScore: number) => {
+    setScore(finalScore);
+    router.push('/dashboard/virtual-teacher');
+  };
+
+  return (
+    <div className="relative  h-screen w-full overflow-hidden text-right  ">
+        
+    <Image
+      src={background}
+      alt="Background Cover"
+      fill
+      className="-z-10 object-center object-cover  "
+    />
+    <div className='justify-center items-center mt-44 mr-4'>
+
+      {score === null ? (
+          <Exam questions={questions} showCorrectAnswer={false} onComplete={handleComplete} />
+        ) : (
+           <div className="flex flex-col justify-center items-center font-sans p-7 bg-gray-50 rounded-md shadow-lg max-w-lg mx-auto mt-52 h-64  " dir='rtl'>
+            <div className='text-center text-primary text-6xl'> 
+                أحسنت!
+            </div>
+        </div>
+      )}
+      </div>
+    </div>
+  );
+};
+
+export default Page;

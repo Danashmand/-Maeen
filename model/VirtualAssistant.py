@@ -208,6 +208,47 @@ def reset_conversation():
     session["conversation_history"] = []
     return jsonify({"message": "Conversation history reset successfully."})
 
+###############################TODO###############################################
+
+@app.route('/spellCheck', methods=['Post'])
+def spell_check():
+    # data = request.json
+    # text = data.get("text", "")
+    
+    # if not text:
+    #     return jsonify({"error": "No text provided"}), 400
+
+    # # Perform spell check using the model
+    # corrected_text = model.spell_check(text)
+    corrected_text = "النص الصحيح"
+    
+    return jsonify({"AI": corrected_text})
+
+
+@app.route('/Exam', methods=['POST'])
+def generateExam():
+    # data = request.json
+    # question = data.get("question", "")
+    
+    # if not question:
+    #     return jsonify({"error": "No question provided"}), 400
+
+    # # Perform proximity search or context retrieval
+    # proximity_context = proximity_search(question)
+    
+    # # Build the conversation history with the new question
+    # prompt = build_conversation_history([], question, proximity_context)
+    
+    # # Generate the response from the model
+    # generated_response = model.generate_text(prompt=prompt)
+    
+    return jsonify({"AI": "generated_response"})
+
+
+########################################################################################
+
+
+
 # New GET route that returns "Hello, World!"
 @app.route('/hello', methods=['GET'])
 def hello_world():
