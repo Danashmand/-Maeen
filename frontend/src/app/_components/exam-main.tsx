@@ -45,7 +45,7 @@ const Exam: React.FC<ExamProps> = ({ questions, showCorrectAnswer = true, onComp
   };
 
   return (
-    <div className="flex flex-col justify-center items-center font-sans p-7 bg-gray-50 rounded-md shadow-lg mx-auto" dir="rtl">
+    <div className="flex flex-col justify-center items-center font-sans p-7 bg-gray-50 rounded-md shadow-lg  mx-auto" dir="rtl">
       <h2 className="mb-4 text-2xl font-medium text-center text-primary">
         {currentQuestion.question}
       </h2>
@@ -53,7 +53,7 @@ const Exam: React.FC<ExamProps> = ({ questions, showCorrectAnswer = true, onComp
         {currentQuestion.options.map((option) => (
           <button
             key={option.id}
-            className={`flex justify-between font-bold items-center px-4 py-3 text-md rounded-lg transition-colors
+            className={`flex justify-between items-center px-4 py-3 text-md rounded-lg transition-colors
               ${
                 selectedOption === option.id
                   ? showCorrectAnswer

@@ -5,6 +5,8 @@ import Image from 'next/image';
 import background from '../public/images/Desktop - 4 (1).png';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
+import PencilIcon from '../public/sidebarIcons/pencil.svg';
+
 const Page = () => {
     const router = useRouter();
     const [userData, setUserData] = useState<{ _id: string; name: string; email: string, score: number } | null>(null);
@@ -88,7 +90,7 @@ const Page = () => {
           score: finalScore,
         });
   
-        console.log('User Level Updated:', response.data);
+        console.log('User Level Updated:', response.data.level);
         
         // Optionally redirect to the dashboard or display a success message
         router.push('/dashboard/virtual-teacher');
@@ -96,7 +98,6 @@ const Page = () => {
         console.error('Error updating user level:', error);
         // Handle the error (e.g., show an error message to the user)
       }
-      // router.push('/dashboard/virtual-teacher');
     };
 
 
@@ -109,18 +110,29 @@ const Page = () => {
       fill
       className="-z-10 object-center object-cover  "
     />
-    <div className='justify-center items-center mt-44 mr-4'>
+            <div className="flex flex-col space-y-3 items-center justify-center min-h-screen ">
+
+    <div className="bg-white/10 p-8 rounded-[10%] items-center text-center justify-center flex  w-[500px] h-[40px]  ">
+
+        <h2 className="flex gap-2 text-3xl font-bold"> 
+      اختبار سريع لتحديد المستوى
+        <Image src={PencilIcon} alt="Logo" className="" />
+      </h2>
+
+    </div>
+    <div className='justify-center items-center w-[540px] mr-4'>
 
       {score === null ? (
           <Exam questions={questions} showCorrectAnswer={false} onComplete={handleComplete} />
         ) : (
-           <div className="flex flex-col justify-center items-center font-sans p-7 bg-gray-50 rounded-md shadow-lg max-w-lg mx-auto mt-52 h-64  " dir='rtl'>
+           <div className="flex flex-col justify-center items-center  bg-gray-50 rounded-md shadow-lg   h-64  " dir='rtl'>
             <div className='text-center text-primary text-6xl'> 
                 أحسنت!
             </div>
         </div>
       )}
       </div>
+    </div>
     </div>
   );
 };

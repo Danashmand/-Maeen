@@ -34,16 +34,15 @@ interface SidebarProps {
   userData: UserData | null; // Accept userData as a prop
 }
 
-const Sidebar = ({ userData }: SidebarProps) => {
+const Sidebar = () => {
   const router = useRouter(); 
   const currentPath = usePathname(); 
 
   const sidebarItems = [
-    { icon: DashboardIcon, label: "لوحة المعلومات", href: "/dashboard" },
-    { icon: VectorIcon, label: "طور قرائتي", href: "/dashboard/comprehensive-lessons" }, 
+    { icon: VectorIcon, label: "طور قرائتي", href: "/dashboard/imporve-reading" }, 
     { icon: AnnotationIcon, label: "مدرسك الإفتراضي", href: "/dashboard/virtual-teacher" },
-    { icon: PencilIcon, label: "حسّن إملائك" },
-    { icon: EqualCircleIcon, label: "اختبر نفسك" },
+    { icon: PencilIcon, label: "حسّن إملائك" , href: "/dashboard/spelling-correction" },
+    { icon: EqualCircleIcon, label: "اختبر نفسك" , href: "/dashboard/test-yourself" },
   ];
 
   return (

@@ -16,24 +16,30 @@ import { lastValueFrom } from 'rxjs';
 export class VirtualTeacherService {
   constructor(
     private readonly httpService: HttpService,
-    @InjectModel(VirtualTeacher.name)  private readonly virtualTeacherModel: Model<VirtualTeacherDocument>,
-    @InjectModel(User.name) private readonly userModel: Model<UserDocument>, 
-
+    @InjectModel(VirtualTeacher.name) private readonly virtualTeacherModel: Model<VirtualTeacherDocument>,
+    @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
   ) {}
 
   async startNewChatSession(userId: string) {
-    const chatId = `chat_${Date.now()}`; // Create a unique chatId (this should be a string)
-    
-    // Log the chatId to ensure it's being created correctly
-  
+    const chatId = `chat_${Date.now()}`; // Create a unique chatId
+
+    // Reset the model conversation by calling the reset endpoint
+    try {
+      await lastValueFrom(this.httpService.post('http://www.maeenmodelserver.site/reset', {}));
+      console.log('Conversation history reset successfully.');
+    } catch (error) {
+      console.error('Failed to reset conversation history', error);
+      throw new Error('Could not reset conversation history');
+    }
+
+    // Create and save the new chat session
     const newChatSession = new this.virtualTeacherModel({
       userId,
-      chatId, // Ensure this is a string
+      chatId,
       messages: [], // Initialize messages as an empty array
       createdAt: new Date(),
     });
-  
-    // Attempt to save the new chat session and handle potential errors
+
     try {
       await newChatSession.save();
       return newChatSession;
@@ -41,15 +47,11 @@ export class VirtualTeacherService {
       throw new Error('Failed to create new chat session');
     }
   }
-  
 
   async handleUserQuery(createvirtualTeacherDto: CreatevirtualTeacherDto) {
-
     const { prompt, userId, chatId } = createvirtualTeacherDto;
 
-    // Generate chatbot response (use your existing method)
     const chatbotResponse = await this.getChatbotResponse(prompt, userId);
-
 
     const userMessage = {
       text: prompt,
@@ -63,10 +65,8 @@ export class VirtualTeacherService {
       createdAt: new Date(),
     };
 
-    // Find the chat session by userId and chatId
     const chatSession = await this.virtualTeacherModel.findOne({ userId, chatId });
     if (chatSession) {
-      // Append the new messages
       chatSession.messages.push(userMessage, chatbotMessage);
       await chatSession.save();
       await this.updateUserScore(userId);
@@ -76,25 +76,24 @@ export class VirtualTeacherService {
       throw new Error('Chat session not found');
     }
   }
+
   private async updateUserScore(userId: string) {
-    // Find the user by userId
     const user = await this.userModel.findById(userId);
     if (user) {
-      // Increment the score by 10 points
       user.score = (user.score || 0) + 10;
-      await user.save(); // Save the updated user document
+      await user.save();
     } else {
       throw new Error('User not found');
     }
   }
-  // Retrieve chat history by chatId (or userId)
+
   async getChatHistory(userId: string, chatId: string) {
     if (!userId || !chatId) {
       console.warn(`Invalid parameters: userId=${userId}, chatId=${chatId}. Returning empty array.`);
-      return []; // or return an appropriate default response
-  }
+      return [];
+    }
     const chatSession = await this.virtualTeacherModel.findOne({ userId, chatId });
-  
+
     if (chatSession) {
       return chatSession.messages;
     } else {
@@ -102,26 +101,24 @@ export class VirtualTeacherService {
       throw new Error('Chat session not found');
     }
   }
-  
 
   async getChatById(chatId: string) {
     return this.virtualTeacherModel.findOne({ chatId });
   }
+
   private async getChatbotResponse(prompt: string, userId: string): Promise<string> {
     const payload = {
       question: prompt,
-      userId: userId, // Include userId in the payload if needed
+      userId: userId,
     };
 
     try {
-      // Make the request to the Flask server
       const response: AxiosResponse<ChatbotResponse> = await lastValueFrom(
         this.httpService.post<ChatbotResponse>('http://www.maeenmodelserver.site/ask', payload, {
           headers: { 'Content-Type': 'application/json' },
         })
       );
 
-      // Ensure response from AI is valid
       if (!response.data || !response.data.AI) {
         throw new Error('No response from AI');
       }
@@ -133,20 +130,16 @@ export class VirtualTeacherService {
     }
   }
 
-
   async findAll() {
-    const allChats= await this.virtualTeacherModel.find();
+    const allChats = await this.virtualTeacherModel.find();
     return allChats;
-    
   }
+
   async findChatsByUserId(userId: string) {
-    const chatHistory = await this.virtualTeacherModel.find({ userId }); // Assuming `userId` is a field in your chat model
+    const chatHistory = await this.virtualTeacherModel.find({ userId });
     if (!chatHistory || chatHistory.length === 0) {
       throw new NotFoundException(`No chat history found for user ID ${userId}`);
     }
     return chatHistory;
   }
-  
-
-  
 }
