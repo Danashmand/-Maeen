@@ -16,6 +16,9 @@ const config: Config = {
         primary: '#972E7C', 
 
       },
+      fontFamily: {
+        'TheYearofTheCamel': ['TheYearofTheCamel', 'Arial', 'Helvetica', 'sans-serif'],
+      },
     },
     plugins: [
       require('tailwind-scrollbar'),

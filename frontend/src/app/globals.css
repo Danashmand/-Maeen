@@ -1,11 +1,27 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@font-face {
+  font-family: 'YearOFTheCamel';
+  src: url('./fonts/alfont_com_alfont_com_TheYearofTheCamel-Medium.otf') format('otf');
+  font-weight: medium;
+  font-style: medium;
+}
+@font-face {
+  font-family: 'YearOFTheCamel';
+  src: url('./fonts/TheYearofTheCamel-Regular.otf') format('otf');
+  font-weight: normal;
+  font-style: normal;
+}
+ 
 *{
   margin: 0;
   padding: 0;
+
   
 }
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -21,7 +37,8 @@
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'TheYearofTheCamel', Arial, Helvetica, sans-serif;
+
 }
 
 @layer utilities {
