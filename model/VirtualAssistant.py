@@ -102,11 +102,9 @@ def hydrate_chromadb():
 chroma_collection = hydrate_chromadb()
 
 # Function to perform proximity search using the question
-def proximity_search(question):
+def proximity_search(question, chroma_collection):
     # Encode the question to get its embedding
     query_vectors = emb.encode([question])  # Get embeddings as a NumPy array
-    
-    # Convert the NumPy array to a list
     query_vectors = query_vectors.tolist()
 
     # Perform the query in ChromaDB using the generated embedding
@@ -121,138 +119,144 @@ def proximity_search(question):
 
     return "\n".join(documents)
 
-# Define the role instruction (this can be part of the prompt in each interaction)
-ROLE_INSTRUCTION = '''🌟 **السياق**: يتمثل دورك في إنشاء تعليمات لنموذج ذكاء اصطناعي يُساعد المستخدمين بإجابات واضحة وسهلة الفهم باللغة العربية. يجب أن تكون الردود **عريضة جداً** للتأكيد، وأن تكون منسقة وجذابة بصرياً باستخدام الإيموجي وتنسيق النص لتمييز المعلومات المهمة.
-
-**الهدف**: الهدف هو ضمان أن يُقدم النموذج إجابات جذابة، واضحة، ومنظمة. التركيز يكون على البساطة وتعزيز الوضوح عبر إبراز النقاط الرئيسية بـ**نص عريض جداً** وإضافة إيموجي لإضفاء طابع ودود.
-
-**الأسلوب**: يجب أن يكون الرد بسيطاً باللغة العربية، مع استخدام **نص عريض جداً** أو نص أكبر لتأكيد النقاط المهمة. تقسيم الإجابة إلى فقرات قصيرة أو نقاط لتعزيز قابلية القراءة. يجب استخدام الإيموجي بشكل يضفي طابعاً دافئاً وشخصية للرد دون مبالغة.
-
-**النبرة**: النبرة يجب أن تكون ود-friendly، مساعدة، ومهنية، مع أسلوب سهل الوصول إليه. يجب أن تشجع المستخدمين على التفاعل مع المعلومات المقدمة.
-
-**الجمهور المستهدف**: يستهدف المتحدثين باللغة العربية الذين يفضلون إجابات موجزة، منسقة بشكل جيد، وجذابة بصرياً، مثل الطلاب، المهنيين، أو المستخدمين العاديين الذين يبحثون عن المساعدة في موضوعات مختلفة.
-
-**إرشادات الرد**:
-- استخدم **نصاً عريضاً جداً** للتأكيد.
-- استخدم الإيموجي لإضفاء الدفء (مثل 😊👍).
-- قم بتنظيم المعلومات في فقرات قصيرة أو نقاط مرقمة لسهولة القراءة.
-- حافظ على نبرة واضحة، مباشرة، وسهلة الفهم.'''
 
 
 
 
-def build_conversation_history(history, new_question, proximity_context):
-    # Start the conversation with the role definition
-    conversation = f"<s> [INST] {ROLE_INSTRUCTION} [/INST]\n"
-    
-    # Add the proximity context from the knowledge base at the top
+# function for building the prompt based on the history of the conversation
+def build_conversation_history(ROLE_INSTRUCTION, history, new_question, proximity_context):
+    conversation = f"<s> [INST] {ROLE_INSTRUCTION} [/INST]\n"    
     if proximity_context:
-        conversation += f"{proximity_context}\n"
-    
-    # Append previous conversation turns (limit to recent ones)
+        conversation += f"{proximity_context}\n"   
     for turn in history:
         conversation += f"<s> [INST] {turn['question']} [/INST]\n{turn['response']}\n"
-    
-    # Add the new question at the end
-    conversation += f"<s> [INST] {new_question} [/INST]"
-    
+    conversation += f"<s> [INST] {new_question} [/INST]"   
     return conversation
 
 
 
-
-MAX_HISTORY_TURNS = 3  # Only store the last 3 turns
-
+def chat(query, MAX_HISTORY_TURNS, ROLE_INSTRUCTION):
+    conversation_history = session.get("conversation_history", [])
+    proximity_context = proximity_search(query, chroma_collection)
+    prompt = build_conversation_history(ROLE_INSTRUCTION, conversation_history, query,proximity_context)
+    generated_response = model.generate_text(prompt=prompt)
+    conversation_history.append({
+            "question": query,
+            "response": generated_response
+        })
+    if len(conversation_history) > MAX_HISTORY_TURNS:
+            conversation_history = conversation_history[- MAX_HISTORY_TURNS:]
+    session["conversation_history"] = conversation_history    
+    return generated_response
+ 
+def getQuestion(level,topic): 
+    if not level: 
+        level = "beginner"
+    proximity_context = proximity_search(topic, chroma_collection)
+    role_instruction = '''You are an AI model that generate a quesiton for kids about foundation of arabic language to examine thier level of understanding
+    - the questions should be in arabic and easy to understand
+    - all the questions should be MCQ questions with four choices each 
+    - the correct answer should be the first one
+    - you are given a context about the topic to help you generate the questions
+    - you are also given the shild's level to generate questions based on his level
+    - you must write the question in arabic inside JSON object with the following format:
+    - the question should be releavent to the topic
+    Example of beginner level question:
+    {"question" : "ما هي الفاكهة بين الخيارات التالية؟","answers" : ["التفاح","الكرسي","الكتاب","الهاتف"]}
+    note that the first answer is the correct one
+    Example of expert level question:
+    {"question" : "كيف تكتب كلمة الهمزة في كلمة أزهار؟","answers" : ["على الألف","على السطر","على الياء","على الواو"]}
+    
+    
+    '''
+    
+    prompt = f'''
+    [INST] {role_instruction} [/INST]
+    '''
+    prompt += f"Context: {proximity_context}\n"
+    prompt += f"Level: {level}\n"
+    prompt += f"Topic: {topic}\n"
+    generated_response = model.generate_text(prompt=prompt)
+    return generated_response
+ 
+ 
+ 
+########################################################################################
 @app.route('/ask', methods=['POST'])
-def ask_question():
+def chatQuestion():
     data = request.json
     question = data.get("question", "")
     
     if not question:
         return jsonify({"error": "No question provided"}), 400
-
-    # Initialize or retrieve conversation history
-    conversation_history = session.get("conversation_history", [])
-
     try:
-        # Perform proximity search or context retrieval
-        proximity_context = proximity_search(question)
-        print(proximity_context)
-        # Build the conversation history with the new question
-        prompt = build_conversation_history(conversation_history, question, proximity_context)
-        
-        # Generate the response from the model
-        generated_response = model.generate_text(prompt=prompt)
-        
-        # Append the new turn (question and response)
-        conversation_history.append({
-            "question": question,
-            "response": generated_response
-        })
-
-        # Keep only the last MAX_HISTORY_TURNS turns
-        if len(conversation_history) > MAX_HISTORY_TURNS:
-            conversation_history = conversation_history[-MAX_HISTORY_TURNS:]
-
-        # Save the updated conversation history
-        session["conversation_history"] = conversation_history
+        # prompt for the virtual assistant
+        virtualAssistantPrompt = '''🌟 **السياق**: يتمثل دورك في إنشاء تعليمات لنموذج ذكاء اصطناعي يُساعد المستخدمين بإجابات واضحة وسهلة الفهم باللغة العربية. يجب أن تكون الردود **عريضة جداً** للتأكيد، وأن تكون منسقة وجذابة بصرياً باستخدام الإيموجي وتنسيق النص لتمييز المعلومات المهمة.
+        **الهدف**: الهدف هو ضمان أن يُقدم النموذج إجابات جذابة، واضحة، ومنظمة. التركيز يكون على البساطة وتعزيز الوضوح عبر إبراز النقاط الرئيسية بـ**نص عريض جداً** وإضافة إيموجي لإضفاء طابع ودود.
+        **الأسلوب**: يجب أن يكون الرد بسيطاً باللغة العربية، مع استخدام **نص عريض جداً** أو نص أكبر لتأكيد النقاط المهمة. تقسيم الإجابة إلى فقرات قصيرة أو نقاط لتعزيز قابلية القراءة. يجب استخدام الإيموجي بشكل يضفي طابعاً دافئاً وشخصية للرد دون مبالغة.
+        **النبرة**: النبرة يجب أن تكون ود-friendly، مساعدة، ومهنية، مع أسلوب سهل الوصول إليه. يجب أن تشجع المستخدمين على التفاعل مع المعلومات المقدمة.
+        **الجمهور المستهدف**: يستهدف المتحدثين باللغة العربية الذين يفضلون إجابات موجزة، منسقة بشكل جيد، وجذابة بصرياً، مثل الطلاب، المهنيين، أو المستخدمين العاديين الذين يبحثون عن المساعدة في موضوعات مختلفة.
+        **إرشادات الرد**:
+        - استخدم **نصاً عريضاً جداً** للتأكيد.
+        - استخدم الإيموجي لإضفاء الدفء (مثل 😊👍).
+        - قم بتنظيم المعلومات في فقرات قصيرة أو نقاط مرقمة لسهولة القراءة.
+        - حافظ على نبرة واضحة، مباشرة، وسهلة الفهم.
+        '''
+        Max_History_Turns = 4
+        generated_response = chat(question, Max_History_Turns, virtualAssistantPrompt)
         
         return jsonify({"AI": generated_response})
     except Exception as e:
+        print(e)
         return jsonify({"error": str(e)}), 500
     
 
-@app.route('/reset', methods=['POST'])
-def reset_conversation():
-    # Clear the conversation history from the session
-    session["conversation_history"] = []
-    return jsonify({"message": "Conversation history reset successfully."})
 
-###############################TODO###############################################
-
-@app.route('/spellCheck', methods=['Post'])
+@app.route('/spelling-correction', methods=['Post'])
 def spell_check():
-    # data = request.json
-    # text = data.get("text", "")
-    
-    # if not text:
-    #     return jsonify({"error": "No text provided"}), 400
+    print("spell check")
+    data = request.json
+    question = data.get("question", "")
+    if not question:
+        return jsonify({"error": "No question provided"}), 400
+    try:
+        # prompt for spellchecker
+        spellingPrmoptRule = '''
+        you are a spell checker, you should be given a text in arabic and return the correct spelling of it, 
+        if the text is spelled correctly you should praise the user and if not you should correct the spelling and give an explaination of the mistake done by the user
+        '''
+        MAX_HISTORY_TURNS = 3
+        response = chat(question, MAX_HISTORY_TURNS, spellingPrmoptRule)
+    except Exception as e:
+        print(e)
+        return jsonify({"error": str(e)}), 500
+    return jsonify({"AI": response})
 
-    # # Perform spell check using the model
-    # corrected_text = model.spell_check(text)
-    corrected_text = "النص الصحيح"
-    
-    return jsonify({"AI": corrected_text})
+
+
+@app.route('/start-exam', methods=['POST'])
+def startExam():
+    data = request.json
+    level = data.get("level", "")
+    topic = data.get("topic", "")
+    topic = "الهمزة"
+    response  = getQuestion(level,topic)
+    return jsonify({"AI": response})
 
 
 @app.route('/Exam', methods=['POST'])
 def generateExam():
-    # data = request.json
-    # question = data.get("question", "")
-    
-    # if not question:
-    #     return jsonify({"error": "No question provided"}), 400
-
-    # # Perform proximity search or context retrieval
-    # proximity_context = proximity_search(question)
-    
-    # # Build the conversation history with the new question
-    # prompt = build_conversation_history([], question, proximity_context)
-    
-    # # Generate the response from the model
-    # generated_response = model.generate_text(prompt=prompt)
     
     return jsonify({"AI": "generated_response"})
-
 
 ########################################################################################
 
 
+@app.route('/reset', methods=['POST'])
+def reset_conversation():
+    session["conversation_history"] = []
+    return jsonify({"message": "Conversation history reset successfully."})
 
-# New GET route that returns "Hello, World!"
-@app.route('/hello', methods=['GET'])
-def hello_world():
-    return jsonify({"message": "Hello, World!"})
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
