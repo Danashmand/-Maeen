@@ -1,7 +1,13 @@
-import { Controller } from '@nestjs/common';
-import { SpellingCorectionService } from './spelling-corection.service';
+import { Controller, Post, Body } from '@nestjs/common';
+import { SpellingCorrectionService } from './spelling-corection.service';
 
-@Controller('spelling-corection')
-export class SpellingCorectionController {
-  constructor(private readonly spellingCorectionService: SpellingCorectionService) {}
+@Controller('spelling-correction')
+export class SpellingCorrectionController {
+  constructor(private readonly spellingCorrectionService: SpellingCorrectionService) {}
+
+  @Post('correct')
+  async correctText(@Body() body: { text: string }) {
+    const correctedText = await this.spellingCorrectionService.correctSpelling(body.text);
+    return { correctedText };
+  }
 }
