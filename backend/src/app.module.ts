@@ -9,8 +9,6 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { SpellingCorectionModule } from './spelling-corection/spelling-corection.module';
-import { ReadingModule } from './reading/reading.module';
-import { SpellingCorrectionModule } from './spelling-correction/spelling-correction.module';
 import { ImporveReadingModule } from './imporve-reading/imporve-reading.module';
 
 
@@ -18,7 +16,7 @@ import { ImporveReadingModule } from './imporve-reading/imporve-reading.module';
   imports: [     ConfigModule.forRoot({ isGlobal: true }),  // Automatically loads .env file
     MongooseModule.forRoot("mongodb+srv://daleh:Dalleh123@cluster0.ul2ia.mongodb.net/Maeen?retryWrites=true&w=majority&appName=Cluster0Maeen"),
 
-    VirtualTeacherModule, UserModule, FirstExamModule,  AuthModule, SpellingCorectionModule, ReadingModule, SpellingCorrectionModule, ImporveReadingModule],
+    VirtualTeacherModule, UserModule, FirstExamModule,  AuthModule, SpellingCorectionModule, ImporveReadingModule],
   controllers: [AppController],
   providers: [AppService],
 })

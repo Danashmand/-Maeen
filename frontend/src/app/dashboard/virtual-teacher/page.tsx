@@ -228,15 +228,9 @@ const [chat, setChat] = useState<{
   }, [chat]);
   return (
        <div className="relative  h-screen flex flex-roww-full overflow-hidden text-right bg-white/95  ">
-{/*         
-        <Image
-          src={background}
-          alt="Background Cover"
-          fill
-          className="-z-10 object-center object-cover  "
-        /> */}
+
       <div className="mb-20">
-        <Sidebar userData={userData}  />
+        <Sidebar />
       </div>
 
       <div className="flex flex-col space-y-4 overflow-y-auto  bg-white/90 mb-5 mt-10 mr-1  w-[119vh] bg-opacity-10 p-6 rounded-3xl shadow-xl backdrop-blur-md " dir="ltr">
