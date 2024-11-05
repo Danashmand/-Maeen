@@ -10,7 +10,7 @@ import random
 import string
 
 app = Flask(__name__)
-app.secret_key = '22'  # Replace with a more secure key
+app.secret_key = '1422'
 
 # Function to retrieve credentials
 def get_credentials():
@@ -22,7 +22,7 @@ def get_credentials():
 # Get project_id and space_id from environment variables
 project_id = "da2e1438-1e80-4b85-9c22-7565678d1498"
 space_id = os.getenv("SPACE_ID")
-
+# topics: writing, reading, grammar
 # Initialize Watson API client
 wml_credentials = get_credentials()
 client = APIClient(wml_credentials=wml_credentials)
@@ -31,18 +31,18 @@ client.set.default_project(project_id)
 # Initialize the sentence transformer model
 emb = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
 
-# Your vector index id and hydration of ChromaDB...
-vector_index_id = "3c606a27-142c-4b67-8bbd-73501ee27d02"
-vector_index_details = client.data_assets.get_details(vector_index_id)
-vector_index_properties = vector_index_details["entity"]["vector_index"]
-
 # Initialize the LLM model (Allam)
 model_id = "sdaia/allam-1-13b-instruct"
 
 parameters = {
     "decoding_method": "greedy",
-    "max_new_tokens": 900,
-    "repetition_penalty": 1
+    "min_new_tokens": 10,
+    "max_new_tokens": 100,
+    "repetition_penalty": 1,
+    "temperature": 2,
+    "top_p": 1.0,
+    "top_k": 90,
+    "random_seed": random.randint(1, 12451)
 }
 
 model = Model(
@@ -50,46 +50,100 @@ model = Model(
     params=parameters,
     credentials=get_credentials(),
     project_id=project_id,
-    space_id=space_id 
+    space_id=space_id
 )
 
-# Hydrate ChromaDB with your knowledge base vectors
-def hydrate_chromadb():
+
+
+# Define task-specific configuration for collections and data sources
+task_config = {
+    "spelling_check": {
+        "collection_name": "spelling_check_collection",
+        "vector_index_id": "3c606a27-142c-4b67-8bbd-73501ee27d02",
+        "top_k": 5
+    },
+    "question_generation": {
+        "collection_name": "question_generation_collection",
+        "vector_index_id": "3c606a27-142c-4b67-8bbd-73501ee27d02",
+        "top_k": 10
+    },
+    "chat": {
+        "collection_name": "chat_collection",
+        "vector_index_id": "3c606a27-142c-4b67-8bbd-73501ee27d02",
+        "top_k": 3
+    }
+}
+
+base_prompts = {
+    "spelling_check": 
+        '''If you find a spelling error, correct it and clearly explain the reason behind the mistake.
+        Provide guidance on how to avoid similar errors in the future. Use a formal tone that is child-friendly.
+        No Additional Responses: Do not respond to any non-spell-checking questions. If the user asks an unrelated question, reply with:
+        "أهلا، ماهي الجملة التي تريد مني تصحيحها😉🔎"
+        Then, wait for the child to provide a new sentence for spelling review.
+
+        Clarification: If any part of these instructions is unclear, ask a specific question. If everything is understood, type only "فهمت" on the screen without any additional text.
+
+        Focus on Spell-Checking Only: Do not engage in discussions or respond to any other topic under any circumstances.
+
+        Reminder: After providing your spell-checking feedback, end your response there without further commentary.
+
+        Example Interaction:
+
+        Child`s Input: "أريد أن أذهب إلى المدرسه."
+        Your Response: "أحسنت! لا توجد أخطاء إملائية في جملتك." (if correct)
+        OR
+        "الكلمة الصحيحة هي 'المدرسة'. يجب أن تحتوي على تاء مربوطة في النهاية. تذكر دائماً استخدام التاء المربوطة في الكلمات التي تعني مكاناً، مثل مدرسة."
+        Note: Keep your responses precise and focused only on spelling, ensuring the child receives clear, accurate feedback.''',
+    
+    "question_generation": "You are an AI model that generates a multiple-choice question for children learning Arabic.",
+    
+    "chat": '''You are a friendly AI that answers questions in Arabic with emoji to add warmth to the conversation.
+    make sure to make your answers short and simple give examples'''
+}
+
+# Function to hydrate ChromaDB
+def hydrate_chromadb(task):
+    config = task_config.get(task)
+    if not config:
+        raise ValueError(f"Task '{task}' is not configured.")
+    
+    
+    chroma_client = chromadb.Client()
+    
+    collection_name = config["collection_name"]
+    vector_index_id = config["vector_index_id"]
+
+    # Try to retrieve the collection, or create it if it doesn't exist
+    try:
+        collection = chroma_client.get_collection(name=collection_name)
+        return collection
+    except Exception:
+        print(f"Collection '{collection_name}' not found. Hydrating ChromaDB...")
+
+    # Fetch and decompress task-specific vector data
     data = client.data_assets.get_content(vector_index_id)
     content = gzip.decompress(data)
-    stringified_vectors = str(content, "utf-8")
-    vectors = json.loads(stringified_vectors)
+    vectors = json.loads(content.decode("utf-8"))
 
-    chroma_client = chromadb.Client()
-
-    collection_name = "my_collection"
-    try:
-        collection = chroma_client.delete_collection(name=collection_name)
-    except:
-        print("Collection didn't exist - nothing to do.")
+    # Create and hydrate the collection
     collection = chroma_client.create_collection(name=collection_name)
-
-    vector_embeddings = []
-    vector_documents = []
-    vector_metadatas = []
-    vector_ids = []
+    vector_embeddings, vector_documents, vector_metadatas, vector_ids = [], [], [], []
 
     for vector in vectors:
         vector_embeddings.append(vector["embedding"])
         vector_documents.append(vector["content"])
         metadata = vector["metadata"]
-        lines = metadata["loc"]["lines"]
-        clean_metadata = {}
-        clean_metadata["asset_id"] = metadata["asset_id"]
-        clean_metadata["asset_name"] = metadata["asset_name"]
-        clean_metadata["url"] = metadata["url"]
-        clean_metadata["from"] = lines["from"]
-        clean_metadata["to"] = lines["to"]
+        clean_metadata = {
+            "asset_id": metadata["asset_id"],
+            "asset_name": metadata["asset_name"],
+            "url": metadata["url"],
+            "from": metadata["loc"]["lines"]["from"],
+            "to": metadata["loc"]["lines"]["to"]
+        }
         vector_metadatas.append(clean_metadata)
-        asset_id = vector["metadata"]["asset_id"]
         random_string = ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
-        id = "{}:{}-{}-{}".format(asset_id, lines["from"], lines["to"], random_string)
-        vector_ids.append(id)
+        vector_ids.append(f"{metadata['asset_id']}:{random_string}")
 
     collection.add(
         embeddings=vector_embeddings,
@@ -97,62 +151,87 @@ def hydrate_chromadb():
         metadatas=vector_metadatas,
         ids=vector_ids
     )
+
+    print(f"Hydration complete for '{task}' collection.")
     return collection
 
-chroma_collection = hydrate_chromadb()
+# Function to perform proximity search
+def proximity_search(question, task):
+    config = task_config.get(task)
+    if not config:
+        raise ValueError(f"Task '{task}' is not configured.")
 
-# Function to perform proximity search using the question
-def proximity_search(question, chroma_collection):
-    # Encode the question to get its embedding
-    query_vectors = emb.encode([question])  # Get embeddings as a NumPy array
-    query_vectors = query_vectors.tolist()
+    collection = hydrate_chromadb(task)
+    query_embedding = emb.encode([question]).tolist()
+    top_k = config["top_k"]
 
-    # Perform the query in ChromaDB using the generated embedding
-    query_result = chroma_collection.query(
-        query_embeddings=query_vectors,
-        n_results=vector_index_properties["settings"]["top_k"],
+    # Perform the proximity search
+    results = collection.query(
+        query_embeddings=query_embedding,
+        n_results=top_k,
         include=["documents", "metadatas", "distances"]
     )
 
-    # Reverse and return the documents from the query results
-    documents = list(reversed(query_result["documents"][0]))
-
+    documents = results["documents"][0]
     return "\n".join(documents)
 
+# Function to build chat prompt
+def build_chat_prompt(task, question, levels, context):
+    base_prompt = base_prompts.get(task)
+    if not base_prompt:
+        raise ValueError(f"Task '{task}' not recognized.")
+    if task == "chat":
+        lvl = stringify(levels["grammer"])
+    elif task == "spelling_check":
+        lvl = stringify(levels["writing"])
 
+    prompt = f"{base_prompt}\nUser Level: {lvl}\nContext: {context}\nUser: {question}"
+    return prompt
 
-
-
-# function for building the prompt based on the history of the conversation
-def build_conversation_history(ROLE_INSTRUCTION, history, new_question, proximity_context):
-    conversation = f"<s> [INST] {ROLE_INSTRUCTION} [/INST]\n"    
-    if proximity_context:
-        conversation += f"{proximity_context}\n"   
-    for turn in history:
-        conversation += f"<s> [INST] {turn['question']} [/INST]\n{turn['response']}\n"
-    conversation += f"<s> [INST] {new_question} [/INST]"   
-    return conversation
-
-
-
-def chat(query, MAX_HISTORY_TURNS, ROLE_INSTRUCTION):
+# Chat function
+def chat(question, levels, task, MAX_HISTORY_TURNS=4):
+    
+    print("chat function")
     conversation_history = session.get("conversation_history", [])
-    proximity_context = proximity_search(query, chroma_collection)
-    prompt = build_conversation_history(ROLE_INSTRUCTION, conversation_history, query,proximity_context)
+    proximity_context = proximity_search(question, task)
+    prompt = build_chat_prompt(task, question, levels, proximity_context)
+    print(prompt)
+    
     generated_response = model.generate_text(prompt=prompt)
-    conversation_history.append({
-            "question": query,
-            "response": generated_response
-        })
-    if len(conversation_history) > MAX_HISTORY_TURNS:
-            conversation_history = conversation_history[- MAX_HISTORY_TURNS:]
-    session["conversation_history"] = conversation_history    
+    conversation_history.append({"question": question, "response": generated_response})
+
+    if len(conversation_history) > MAX_HISTORY_TURNS * 2:
+        conversation_history = conversation_history[-MAX_HISTORY_TURNS * 2:]
+
+    session["conversation_history"] = conversation_history
     return generated_response
- 
-def getQuestion(level,topic): 
-    if not level: 
-        level = "beginner"
-    proximity_context = proximity_search(topic, chroma_collection)
+
+def updateLevel(answer, time, level, activity):
+    # Sensitivity decay parameters
+    initial_sensitivity = 20  
+    minimum_sensitivity = 0.5 
+    decay_factor = 0.75 
+
+    sensitivity = max(minimum_sensitivity, initial_sensitivity * (decay_factor ** activity))
+    # 20 at first
+    # 15 at second, 11 at third,...
+    
+    
+    if answer:
+        # Faster correct answers give higher score
+        score = (20 - time) / 10 if time < 20 else 0.5 #from 2 - 0.5
+        level += score * sensitivity
+    else:
+        # Slower wrong answers give greater penalty
+        score = (time - 20) / 10 if time > 10 else 0.5
+        level -= score * sensitivity
+
+    level = min(max(level, 1), 100)
+    return level
+
+def getQuestion(levels,topic): 
+    lvl = stringify(levels[topic])
+        
     role_instruction = '''You are an AI model that generate a quesiton for kids about foundation of arabic language to examine thier level of understanding
     - the questions should be in arabic and easy to understand
     - all the questions should be MCQ questions with four choices each 
@@ -166,97 +245,130 @@ def getQuestion(level,topic):
     note that the first answer is the correct one
     Example of expert level question:
     {"question" : "كيف تكتب كلمة الهمزة في كلمة أزهار؟","answers" : ["على الألف","على السطر","على الياء","على الواو"]}
-    
-    
     '''
     
     prompt = f'''
     [INST] {role_instruction} [/INST]
     '''
+    proximity_context = proximity_search(topic, "question_generation")
     prompt += f"Context: {proximity_context}\n"
-    prompt += f"Level: {level}\n"
+    prompt += f"Level: {lvl}\n"
     prompt += f"Topic: {topic}\n"
     generated_response = model.generate_text(prompt=prompt)
     return generated_response
- 
- 
- 
-########################################################################################
+
+# Function to stringify user level
+def stringify(level):
+    if level < 0:
+        raise ValueError("Level cannot be negative")
+    elif level < 20:
+        return "beginner"
+    elif level < 40:
+        return "beginner to intermediate"
+    elif level < 60:
+        return "intermediate"
+    elif level < 80:
+        return "intermediate to expert"
+    else:
+        return "expert"
+
+def getStory(level):
+    lvl = stringify(level)
+    prompt = '''you are an arabic story teller that writes short stories for children in ARABIC language. the child is {lvl} at reading in arabic language.
+    write exicting stories that are easy to understand and fun to read. use simple words and make sure the stories are not long.
+    الطفل: اعطني قصة 
+    حاكي القصص: في ليلة جميلة وهادئة، كان القمر يلعب مع النجوم في السماء. رأى طفلًا ينظر إليه من النافذة، فابتسم القمر للطفل. شعر الطفل بالسعادة وضحك، وضحك القمر أيضًا. ومنذ ذلك الحين، كلما شعر الطفل بالحزن، كان ينظر إلى القمر، فيبتسم له ويشعر بالفرح مرة أخرى.
+    الطفل: اعطني قصة: 
+    حاكي القصص: كان هناك أرنب صغير يعيش في الغابة. يوماً ما، شعر بالجوع الشديد ولكنه لم يجد الجزر في مكانه المعتاد. فكر الأرنب قليلاً، ثم استخدم أنفه ليشم الهواء ويبحث عن الجزر. وجد الأرنب حقلاً كبيراً مليئاً بالجزر بعد أن تبع رائحته. أكل الأرنب الجزر وشعر بالسعادة والامتنان لذكائه.
+    الطفل: اعطني قصة
+    حاكي القصص: كانت هناك فراشة صغيرة تحب الطيران في الحديقة. في يوم مشمس، رأت فراشة زهرة جميلة وقررت أن تستريح عليها. شكرت الفراشة الزهرة على رحيقها اللذيذ وألوانها الزاهية. قالت الزهرة للفراشة: "تعالي دائماً لتزوريني." ومنذ ذلك اليوم، كانت الفراشة تزور الزهرة كل يوم وتنشر الفرح في الحديقة.
+    الطفل: اعطني قصة
+    حاكي القصص: '''
+    model.params["random_seed"] = random.randint(1, 12451)
+    respons = model.generate_text(prompt=prompt)
+    return respons
+    
+#############################################################################
+#############################################################################
+#######################  <flask routes below> ###############################
+#############################################################################
+#############################################################################
+
 @app.route('/ask', methods=['POST'])
 def chatQuestion():
     data = request.json
     question = data.get("question", "")
-    
+    levels = data.get("levels", "")
     if not question:
         return jsonify({"error": "No question provided"}), 400
     try:
-        # prompt for the virtual assistant
-        virtualAssistantPrompt = '''🌟 **السياق**: يتمثل دورك في إنشاء تعليمات لنموذج ذكاء اصطناعي يُساعد المستخدمين بإجابات واضحة وسهلة الفهم باللغة العربية. يجب أن تكون الردود **عريضة جداً** للتأكيد، وأن تكون منسقة وجذابة بصرياً باستخدام الإيموجي وتنسيق النص لتمييز المعلومات المهمة.
-        **الهدف**: الهدف هو ضمان أن يُقدم النموذج إجابات جذابة، واضحة، ومنظمة. التركيز يكون على البساطة وتعزيز الوضوح عبر إبراز النقاط الرئيسية بـ**نص عريض جداً** وإضافة إيموجي لإضفاء طابع ودود.
-        **الأسلوب**: يجب أن يكون الرد بسيطاً باللغة العربية، مع استخدام **نص عريض جداً** أو نص أكبر لتأكيد النقاط المهمة. تقسيم الإجابة إلى فقرات قصيرة أو نقاط لتعزيز قابلية القراءة. يجب استخدام الإيموجي بشكل يضفي طابعاً دافئاً وشخصية للرد دون مبالغة.
-        **النبرة**: النبرة يجب أن تكون ود-friendly، مساعدة، ومهنية، مع أسلوب سهل الوصول إليه. يجب أن تشجع المستخدمين على التفاعل مع المعلومات المقدمة.
-        **الجمهور المستهدف**: يستهدف المتحدثين باللغة العربية الذين يفضلون إجابات موجزة، منسقة بشكل جيد، وجذابة بصرياً، مثل الطلاب، المهنيين، أو المستخدمين العاديين الذين يبحثون عن المساعدة في موضوعات مختلفة.
-        **إرشادات الرد**:
-        - استخدم **نصاً عريضاً جداً** للتأكيد.
-        - استخدم الإيموجي لإضفاء الدفء (مثل 😊👍).
-        - قم بتنظيم المعلومات في فقرات قصيرة أو نقاط مرقمة لسهولة القراءة.
-        - حافظ على نبرة واضحة، مباشرة، وسهلة الفهم.
-        '''
-        Max_History_Turns = 4
-        generated_response = chat(question, Max_History_Turns, virtualAssistantPrompt)
-        
+        generated_response = chat(question, levels, task="chat")
         return jsonify({"AI": generated_response})
     except Exception as e:
         print(e)
         return jsonify({"error": str(e)}), 500
-    
 
-
-@app.route('/spelling-correction', methods=['Post'])
+#needs: levels, question
+@app.route('/spelling-correction', methods=['POST'])
 def spell_check():
-    print("spell check")
     data = request.json
+    levels = data.get("levels", "")
     question = data.get("question", "")
     if not question:
         return jsonify({"error": "No question provided"}), 400
     try:
-        # prompt for spellchecker
-        spellingPrmoptRule = '''
-        you are a spell checker, you should be given a text in arabic and return the correct spelling of it, 
-        if the text is spelled correctly you should praise the user and if not you should correct the spelling and give an explaination of the mistake done by the user
-        '''
-        MAX_HISTORY_TURNS = 3
-        response = chat(question, MAX_HISTORY_TURNS, spellingPrmoptRule)
+        response = chat(question, levels, task="spelling_check", MAX_HISTORY_TURNS=3)
+        return jsonify({"AI": response})
     except Exception as e:
-        print(e)
+        print("Error at spell check:", e)
         return jsonify({"error": str(e)}), 500
-    return jsonify({"AI": response})
 
-
-
+# needs: levels, topic for first question
 @app.route('/start-exam', methods=['POST'])
 def startExam():
+    print("start exam")
     data = request.json
-    level = data.get("level", "")
+    levels = data.get("levels", "")
+    print(levels)
     topic = data.get("topic", "")
-    topic = "الهمزة"
-    response  = getQuestion(level,topic)
+    response = getQuestion(levels, topic)
     return jsonify({"AI": response})
 
 
-@app.route('/Exam', methods=['POST'])
-def generateExam():
+# needs: levels, topic, answer, time, userActivity, newTopic
+@app.route('/nextQuestion', methods=['POST'])
+def sendNextQuestion():
+    data = request.json
+    answer = data.get("answer", "")
+    time = data.get("time", "")
+    topic = data.get("topic", "")
+    newTopic = data.get("newTopic", "")
+    levels = data.get("levels", "")
+    print(levels)
+    singlevel = levels[topic]
+    userActivity = data.get("userActivity", "")
+    singlevel = updateLevel(answer, time, singlevel, userActivity)
+    levels[topic] = singlevel
     
-    return jsonify({"AI": "generated_response"})
+    if newTopic:
+        response = getQuestion(levels, newTopic)
+    else:
+        response = "Exam finished"
+    return jsonify({"AI": response,"levels":levels})
 
-########################################################################################
-
-
+# For clearing the conversation history
 @app.route('/reset', methods=['POST'])
 def reset_conversation():
     session["conversation_history"] = []
     return jsonify({"message": "Conversation history reset successfully."})
 
+@app.route('/story', methods=['POST'])
+def sendStory():
+    data = request.json
+    levels = data.get("levels", "")
+    response = getStory(levels["reading"])
+    return jsonify({"AI": response})
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
+
