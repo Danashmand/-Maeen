@@ -4,7 +4,7 @@ import Image from 'next/image'
 const Nav = () => {
   return (
     <div className='flex justify-between items-center text-xl ml-4 '>
-      <Image src={Logo} alt="logo" /> 
+      <Image src={Logo} alt="logo" width={170}/> 
       <div className='flex justify-around gap-8 ml-20' > 
         <div  className=' rounded-2xl p-1'>من نحن</div>
         <div className=' rounded-2xl p-1'>خدماتنا </div>

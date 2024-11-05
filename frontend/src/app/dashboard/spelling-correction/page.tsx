@@ -16,8 +16,7 @@ const [chat, setChat] = useState<{
   const [userInput, setUserInput] = useState("");
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
   const [userData, setUserData] = useState<{ _id: string; name: string; email: string, score: number } | null>(null);
-  const [chatHistory, setChatHistory] = useState<{ id: string; firstMessage: string; date: string }[]>([]);
-  const [chatId, setChatId] = useState<string | null>(null);
+
   const router = useRouter();
   const [colorClass, setColorClass] = useState("text-secondary");
   const [displayedScore, setDisplayedScore] = useState(userData ? userData.score : 0);
@@ -39,117 +38,43 @@ const [chat, setChat] = useState<{
 
 
 
-  useEffect(() => {
-    const createNewChatSession = async () => {
-  
-      try {
-        const response = await fetch("https://maeen-production.up.railway.app/virtual-teacher/start-session", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId: userData?._id }),
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to create a new chat session");
-        }
-
-        const data = await response.json();
-        setChatId(data.ChatId);
-
-        if (data.ChatId) {
-          localStorage.setItem("chatId", data.ChatId);
-          console.log("Chat ID saved:", data.ChatId);
-        } else {
-          throw new Error("Chat ID not returned from the server");
-        }
-      } catch (error) {
-        console.error("Error creating chat session", error);
-      }
-    };
-
-    if (userData) {
-      createNewChatSession();
-    }
-  }, [userData]);
-  useEffect(() => {
-    const fetchChatHistory = async () => {
-      if (userData && userData._id) { // Ensure userData and user ID are available
-        try {
-          const response = await fetch(`https://maeen-production.up.railway.app/virtual-teacher/chats/user/${userData._id}`, {
-            method: "GET",
-            headers: { "Content-Type": "application/json" },
-          });
-    
-          if (!response.ok) {
-            throw new Error("Failed to fetch chat history");
-          }
-    
-          const data = await response.json();
-    
-          // Log the data to check its structure
-          console.log(data); 
-    
-          // Check if data is an array before mapping
-          if (Array.isArray(data)) {
-            const formattedHistory = data.map((chat) => ({
-              id: chat.chatId,
-              firstMessage: chat.messages[0] ? chat.messages[0].text.substring(0, 12) : 'Blank',
-              date: new Date(chat.createdAt).toLocaleDateString(),
-            })).reverse();
-    
-            setChatHistory(formattedHistory);
-          } else {
-            console.error("Expected data to be an array but got:", data);
-          }
-        } catch (error) {
-          console.error("Error fetching chat history:", error);
-        }
-      }
-    };
-    
-    
-
-    fetchChatHistory();
-  }, [userData, chatId]);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
   
     const userPrompt = { createdAt: new Date().toISOString(), prompt: userInput, answer: "" };
-    setChat((prev) => [...prev, userPrompt]); 
+    setChat((prev) => [...prev, userPrompt]);
     setUserInput("");
   
     if (userData) {
-      const newScore = userData.score + 10; // or any other logic for score calculation
-      setUserData({ ...userData, score: newScore }); // Update userData with new score
-  
-      // Change color class sequence
+      const newScore = userData.score + 10; // Update score based on desired logic
+      setUserData({ ...userData, score: newScore });
+   
+      // Animate score color change
       setColorClass("text-green-500");
-      setTimeout(() => setColorClass("text-green-500"), 900);
       setTimeout(() => setColorClass("text-secondary"), 2000);
   
       // Start score increment animation
-      incrementScore(userData.score, newScore, 1000); // Duration in milliseconds
+      incrementScore(userData.score, newScore, 1000); // Duration in ms
     }
   
     setLoading(true);
   
+    const payload = {
+      question: prompt,
+      userId: userData?._id,
+    };
+    
     try {
-      if (!chatId) {
-        throw new Error("Chat ID is missing. Please start a new chat session.");
-      }
-  
-      const response = await fetch("https://maeen-production.up.railway.app/virtual-teacher/ask", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          prompt: userInput,
-          userId: userData?._id,
-          chatId: chatId, // Pass chatId in the request
-        }),
+      const response = await fetch('https://www.maeenmodelserver.site/ask', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
       });
-  
+    
       if (!response.ok) {
-        throw new Error("Failed to fetch teacher response");
+        throw new Error('Network response was not ok');
       }
   
       const data = await response.json();
@@ -161,12 +86,13 @@ const [chat, setChat] = useState<{
         return updatedChat;
       });
     } catch (error) {
-      console.error("Error fetching the API", error);
+      console.error("Error fetching the API:", error);
     } finally {
       setLoading(false);
       scrollToBottom();
     }
   };
+  
   
   
   const incrementScore = (start: number, end: number, duration: number) => {
@@ -186,28 +112,7 @@ const [chat, setChat] = useState<{
     }, duration / totalSteps);
   };
   
-  const handleChatClick = async (id: string) => {
-    try {
-      const response = await fetch(`https://maeen-production.up.railway.app/virtual-teacher/${id}`);
-      const chatData = await response.json();
-  
-      const formattedMessages = chatData.messages.map((message: { text: string; source: string; createdAt: Date }) => {
-        return {
-          text: message.text, // Keep the message text
-          source: message.source, // Keep the message source (user or chatbot)
-          createdAt: message.createdAt, // Include createdAt timestamp
-          prompt: message.source === 'user' ? message.text : null, // Keep the prompt if it's from the user
-          answer: message.source === 'chatbot' ? formatResponse(message.text) : null, // Keep the answer if it's from the chatbot
-        };
-      }).filter((message: { prompt: any; answer: any; }) => message.prompt || message.answer); // Filter out messages that are empty
-  
-      setChat(formattedMessages); // Set the chat state with formatted messages
-      scrollToBottom(); // Scroll to bottom after chat click
 
-    } catch (error) {
-      console.error("Error fetching chat data:", error);
-    }
-  };
   
   
   

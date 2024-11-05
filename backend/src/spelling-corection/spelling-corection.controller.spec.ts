@@ -1,20 +1,13 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { SpellingCorectionController } from './spelling-corection.controller';
-import { SpellingCorectionService } from './spelling-corection.service';
+import { Controller, Post, Body } from '@nestjs/common';
+import { SpellingCorrectionService } from './spelling-corection.service';
 
-describe('SpellingCorectionController', () => {
-  let controller: SpellingCorectionController;
+@Controller('spelling-correction')
+export class SpellingCorrectionController {
+  constructor(private readonly spellingCorrectionService: SpellingCorrectionService) {}
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      controllers: [SpellingCorectionController],
-      providers: [SpellingCorectionService],
-    }).compile();
-
-    controller = module.get<SpellingCorectionController>(SpellingCorectionController);
-  });
-
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
-  });
-});
+  @Post('correct')
+  async correctText(@Body() body: { text: string }) {
+    const correctedText = await this.spellingCorrectionService.correctSpelling(body.text);
+    return { correctedText };
+  }
+}
