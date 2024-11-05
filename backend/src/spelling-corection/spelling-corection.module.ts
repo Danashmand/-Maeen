@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { SpellingCorrectionService } from './spelling-corection.service';
-import { SpellingCorectionController } from './spelling-corection.controller';
+import { SpellingCorrectionController } from './spelling-corection.controller';
 
 @Module({
-  controllers: [SpellingCorectionController],
+  controllers: [SpellingCorrectionController],
   providers: [SpellingCorrectionService],
 })
 export class SpellingCorectionModule {}
