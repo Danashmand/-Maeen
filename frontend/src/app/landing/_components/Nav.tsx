@@ -18,8 +18,8 @@ const Nav = () => {
 
 
 <div className='flex justify-between gap-4 mr-7 font-bold'>
-    <button className='border  rounded-2xl p-1'> مستخدم جديد</button>
-    <button > تسجيل دخول</button>
+    <a className='border  rounded-2xl p-1' href='auth/signup' > مستخدم جديد</a>
+    <a className='p-1' href='auth/signin'> تسجيل دخول</a>
 </div> 
 
 
