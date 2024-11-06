@@ -10,6 +10,9 @@ export class SpellingCorrectionService {
   async correctSpelling(question: string, levels: { writing: number; reading: number; grammer: number }): Promise<string> {
     const payload = { question, levels };
 
+    // Log payload for debugging purposes
+    console.log('Payload being sent to spelling correction service:', payload);
+
     try {
       const response: AxiosResponse<{ corrected_text: string }> = await lastValueFrom(
         this.httpService.post('http://www.maeenmodelserver.site/spelling-correction', payload, {
@@ -17,7 +20,6 @@ export class SpellingCorrectionService {
         })
       );
 
-      // Check if response contains corrected text
       if (!response.data || !response.data.corrected_text) {
         throw new Error('No corrected text in response');
       }
