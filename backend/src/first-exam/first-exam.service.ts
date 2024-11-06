@@ -31,30 +31,30 @@ export class FirstExamService {
     return response.data;
   }
 
-  // Main function to start the exam
-  async create(createFirstExamDto: CreateFirstExamDto) {
-    const { levels, topic } = createFirstExamDto;
-    const questions: string[] = [];
+  // // Main function to start the exam
+  // async create(createFirstExamDto: CreateFirstExamDto) {
+  //   const { levels, topic } = createFirstExamDto;
+  //   const questions: string[] = [];
 
-    // Get first question
-    let firstQuestion = await this.getFirstQuestion(levels, topic);
-    questions.push(firstQuestion.question);
+  //   // Get first question
+  //   let firstQuestion = await this.getFirstQuestion(levels, topic);
+  //   questions.push(firstQuestion.question);
 
-    let currentLevels = firstQuestion.levels;
-    let currentTopic = firstQuestion.topic;
-    let newTopic = currentTopic;
+  //   let currentLevels = firstQuestion.levels;
+  //   let currentTopic = firstQuestion.topic;
+  //   let newTopic = currentTopic;
 
-    // Get next questions
-    for (let i = 1; i < 5; i++) {
-      let nextQuestion = await this.getNextQuestion(currentLevels, currentTopic, newTopic, 4, 5, true);
-      questions.push(nextQuestion.question);
-      currentLevels = nextQuestion.levels;
-      currentTopic = nextQuestion.topic;
-    }
+  //   // Get next questions
+  //   for (let i = 1; i < 5; i++) {
+  //     let nextQuestion = await this.getNextQuestion(currentLevels, currentTopic, newTopic, 4, 5, true);
+  //     questions.push(nextQuestion.question);
+  //     currentLevels = nextQuestion.levels;
+  //     currentTopic = nextQuestion.topic;
+  //   }
 
-    return {
-      userId: createFirstExamDto.userId,
-      questions,
-    };
-  }
+  //   return {
+  //     userId: createFirstExamDto.userId,
+  //     questions,
+  //   };
+  // }
 }

@@ -19,7 +19,6 @@ const Page = () => {
     const [topic, setTopic] = useState('grammar');
     const [userActivity, setUserActivity] = useState(0);
 
-    
     useEffect(() => {
         const fetchUserData = async () => {
             const user = localStorage.getItem("user");
@@ -34,14 +33,14 @@ const Page = () => {
         fetchUserData();
     }, [router]);
 
-    // Fetch the first set of questions when the user data is available
+    // Fetch the first question when the user data is available
     useEffect(() => {
         if (userData) {
             startExam();
         }
     }, [userData]);
 
-    // Start the exam by fetching questions from the server
+    // Start the exam by fetching the first question from the server
     const startExam = async () => {
         try {
             const response = await axios.post('https://maeen-production.up.railway.app/first-exam', {
@@ -56,7 +55,7 @@ const Page = () => {
         }
     };
 
-    // Handle answer submission
+    // Handle answer submission and fetch next question
     const submitAnswer = async (answer: string) => {
         try {
             setUserLevels(prev => ({
@@ -80,8 +79,9 @@ const Page = () => {
             });
 
             // If there are more questions, move to the next one
-            if (currentQuestionIndex < questions.length - 1) {
-                setCurrentQuestionIndex(currentQuestionIndex + 1);
+            if (response.data && response.data.question) {
+                setQuestions(prev => [...prev, response.data]); // Append the next question
+                setCurrentQuestionIndex(prevIndex => prevIndex + 1); // Move to the next question
             } else {
                 // Final score calculation and handling
                 const finalScore = calculateFinalScore();

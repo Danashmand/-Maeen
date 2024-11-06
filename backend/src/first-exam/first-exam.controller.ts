@@ -8,7 +8,7 @@ export class FirstExamController {
 
   @Post()
   async create(@Body() createFirstExamDto: CreateFirstExamDto) {
-    return this.firstExamService.create(createFirstExamDto);
+    return this.firstExamService.getFirstQuestion(createFirstExamDto,"grammer");
   }
 
   @Post('nextQuestion')
