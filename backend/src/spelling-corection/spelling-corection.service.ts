@@ -1,4 +1,4 @@
-import { Injectable, HttpServer } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { lastValueFrom } from 'rxjs';
 import { AxiosResponse } from 'axios';
 import { HttpService } from '@nestjs/axios';
@@ -7,8 +7,8 @@ import { HttpService } from '@nestjs/axios';
 export class SpellingCorrectionService {
   constructor(private readonly httpService: HttpService) {}
 
-  async correctSpelling(text: string): Promise<string> {
-    const payload = { text };
+  async correctSpelling(question: string, levels: { writing: number; reading: number; grammar: number }): Promise<string> {
+    const payload = { question, levels };
 
     try {
       const response: AxiosResponse<{ corrected_text: string }> = await lastValueFrom(

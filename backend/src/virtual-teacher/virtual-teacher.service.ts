@@ -1,16 +1,16 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { VirtualTeacher, VirtualTeacherDocument } from './virtual-teacher.schema'; // Adjust the path as necessary
+import { VirtualTeacher, VirtualTeacherDocument } from './virtual-teacher.schema';
 import { CreatevirtualTeacherDto } from './dto/create-virtualTeacher.dto';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { HttpService } from '@nestjs/axios';
 import { AxiosResponse } from 'axios';
-import { User, UserDocument } from '../users/users.schema'; // Adjust the path as necessary
+import { User, UserDocument } from '../users/users.schema';
+import { lastValueFrom } from 'rxjs';
 
 interface ChatbotResponse {
   AI: string;
 }
-import { lastValueFrom } from 'rxjs';
 
 @Injectable()
 export class VirtualTeacherService {
@@ -21,9 +21,8 @@ export class VirtualTeacherService {
   ) {}
 
   async startNewChatSession(userId: string) {
-    const chatId = `chat_${Date.now()}`; // Create a unique chatId
+    const chatId = `chat_${Date.now()}`;
 
-    // Reset the model conversation by calling the reset endpoint
     try {
       await lastValueFrom(this.httpService.post('http://www.maeenmodelserver.site/reset', {}));
       console.log('Conversation history reset successfully.');
@@ -32,11 +31,10 @@ export class VirtualTeacherService {
       throw new Error('Could not reset conversation history');
     }
 
-    // Create and save the new chat session
     const newChatSession = new this.virtualTeacherModel({
       userId,
       chatId,
-      messages: [], // Initialize messages as an empty array
+      messages: [],
       createdAt: new Date(),
     });
 
@@ -51,7 +49,7 @@ export class VirtualTeacherService {
   async handleUserQuery(createvirtualTeacherDto: CreatevirtualTeacherDto) {
     const { prompt, userId, chatId } = createvirtualTeacherDto;
 
-    const chatbotResponse = await this.getChatbotResponse(prompt, userId);
+    const chatbotResponse = await this.getChatbotResponse(prompt, userId, 'ask'); // Default to 'ask' for Virtual Assistant
 
     const userMessage = {
       text: prompt,
@@ -77,10 +75,10 @@ export class VirtualTeacherService {
     }
   }
 
-  private async updateUserScore(userId: string) {
+  private async updateUserScore(userId: string, skill: 'writing' | 'reading' | 'grammar' = 'writing') {
     const user = await this.userModel.findById(userId);
     if (user) {
-      user.score = (user.score || 0) + 10;
+      user.levels[skill] = (user.levels[skill] || 0) + 10;
       await user.save();
     } else {
       throw new Error('User not found');
@@ -106,15 +104,26 @@ export class VirtualTeacherService {
     return this.virtualTeacherModel.findOne({ chatId });
   }
 
-  private async getChatbotResponse(prompt: string, userId: string): Promise<string> {
+  private async getChatbotResponse(prompt: string, userId: string, serviceType: 'ask' | 'spelling-correction'): Promise<string> {
+    const user = await this.userModel.findById(userId);
+    if (!user) throw new Error('User not found');
+    
     const payload = {
       question: prompt,
-      userId: userId,
+      levels: {
+        writing: user.levels.writing || 0,
+        reading: user.levels.reading || 0,
+        grammar: user.levels.grammar || 0,
+      },
     };
+
+    const endpoint = serviceType === 'spelling-correction' 
+      ? 'http://www.maeenmodelserver.site/spelling-correction' 
+      : 'http://www.maeenmodelserver.site/ask';
 
     try {
       const response: AxiosResponse<ChatbotResponse> = await lastValueFrom(
-        this.httpService.post<ChatbotResponse>('http://www.maeenmodelserver.site/ask', payload, {
+        this.httpService.post<ChatbotResponse>(endpoint, payload, {
           headers: { 'Content-Type': 'application/json' },
         })
       );

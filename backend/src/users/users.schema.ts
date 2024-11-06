@@ -1,12 +1,24 @@
-
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
 export type UserDocument = User & Document;
 
 @Schema()
+class Levels {
+  @Prop({ default: 0 })
+  writing: number;
+
+  @Prop({ default: 0 })
+  reading: number;
+
+  @Prop({ default: 0 })
+  grammar: number;
+}
+
+const LevelsSchema = SchemaFactory.createForClass(Levels);
+
+@Schema()
 export class User {
-  [x: string]: any;
   @Prop({ required: true, unique: true })
   email: string;
 
@@ -15,9 +27,11 @@ export class User {
 
   @Prop()
   name: string;
-  @Prop()
-  level: string;
-  @Prop({default: 0})
+
+  @Prop({ type: LevelsSchema, default: {} })
+  levels: Levels;
+
+  @Prop({ default: 0 })
   score: number;
 }
 

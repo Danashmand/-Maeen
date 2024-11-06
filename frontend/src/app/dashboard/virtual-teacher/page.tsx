@@ -58,7 +58,6 @@ const [chat, setChat] = useState<{
 
         if (data.ChatId) {
           localStorage.setItem("chatId", data.ChatId);
-          console.log("Chat ID saved:", data.ChatId);
         } else {
           throw new Error("Chat ID not returned from the server");
         }
@@ -87,7 +86,7 @@ const [chat, setChat] = useState<{
           const data = await response.json();
     
           // Log the data to check its structure
-          console.log(data); 
+          
     
           // Check if data is an array before mapping
           if (Array.isArray(data)) {
@@ -99,7 +98,6 @@ const [chat, setChat] = useState<{
     
             setChatHistory(formattedHistory);
           } else {
-            console.error("Expected data to be an array but got:", data);
           }
         } catch (error) {
           console.error("Error fetching chat history:", error);
