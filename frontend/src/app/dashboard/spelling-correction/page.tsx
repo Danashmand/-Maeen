@@ -15,7 +15,7 @@ const [chat, setChat] = useState<{
 const [loading, setLoading] = useState(false);
 const [userInput, setUserInput] = useState("");
 const messagesEndRef = useRef<null | HTMLDivElement>(null);
-const [userData, setUserData] = useState<{ _id: string; name: string; email: string, score: number } | null>(null);
+const [userData, setUserData] = useState<{ _id: string; name: string; email: string, score: number ,levels:{writing:number,reading:number,grammer:number} } | null>(null);
 const [chatHistory, setChatHistory] = useState<{ id: string; firstMessage: string; date: string }[]>([]);
 const [chatId, setChatId] = useState<string | null>(null);
 const router = useRouter();
@@ -58,7 +58,6 @@ useEffect(() => {
 
       if (data.ChatId) {
         localStorage.setItem("chatId", data.ChatId);
-        console.log("Chat ID saved:", data.ChatId);
       } else {
         throw new Error("Chat ID not returned from the server");
       }
@@ -86,8 +85,7 @@ useEffect(() => {
   
         const data = await response.json();
   
-        // Log the data to check its structure
-        console.log(data); 
+ 
   
         // Check if data is an array before mapping
         if (Array.isArray(data)) {
@@ -138,13 +136,12 @@ const handleSubmit = async (e: React.FormEvent) => {
       throw new Error("Chat ID is missing. Please start a new chat session.");
     }
 
-    const response = await fetch("https://maeen-production.up.railway.app/virtual-teacher/ask", {
+    const response = await fetch("https://maeen-production.up.railway.app/spelling-correction/correct", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        prompt: userInput,
-        userId: userData?._id,
-        chatId: chatId, // Pass chatId in the request
+        text: userInput,
+        levels:userData?.levels
       }),
     });
 
