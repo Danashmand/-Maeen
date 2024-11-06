@@ -1,4 +1,3 @@
-// src/auth/auth.controller.ts
 import { Controller, Post, Body, Get, UseGuards, Req, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
@@ -13,7 +12,12 @@ export class AuthController {
     @Body('password') password: string,
     @Body('name') name: string,
   ) {
-    return this.authService.signUp(email, password, name,"beginner");
+    // Pass level as an object with default values
+    return this.authService.signUp(email, password, name, {
+      writing: 0,  // Default value for writing
+      reading: 0,  // Default value for reading
+      grammar: 0   // Default value for grammar
+    });
   }
 
   @Post('signin')
@@ -23,6 +27,7 @@ export class AuthController {
   ) {
     return this.authService.signIn(email, password);
   }
+
   @Get('google')
   @UseGuards(AuthGuard('google'))
   async googleAuth(@Req() req) {
@@ -35,7 +40,6 @@ export class AuthController {
   async googleAuthRedirect(@Req() req, @Res() res) {
     const jwt = await this.authService.googleLogin(req.user);
     res.cookie('user', jwt, { httpOnly: true });  // Example of setting a cookie
-    res.redirect(`http://localhost:3000/auth/getmail`); // Redirect to dashboard  res.redirect
-  
+    res.redirect(`http://localhost:3000/auth/getmail`); // Redirect to dashboard
   }
 }

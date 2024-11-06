@@ -19,6 +19,7 @@ const LevelsSchema = SchemaFactory.createForClass(Levels);
 
 @Schema()
 export class User {
+  [x: string]: any;
   @Prop({ required: true, unique: true })
   email: string;
 

@@ -1,4 +1,3 @@
-// src/auth/strategies/google.strategy.ts
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, VerifyCallback } from 'passport-google-oauth20';
@@ -12,14 +11,19 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     private userService: UserService  // Inject the UserService
   ) {
     super({
-      clientID: configService.get<string>('GOOGLE_CLIENT_ID') ,
+      clientID: configService.get<string>('GOOGLE_CLIENT_ID'),
       clientSecret: configService.get<string>('GOOGLE_CLIENT_SECRET'),
       callbackURL: 'https://maeen-production.up.railway.app/auth/google/redirect',
       scope: ['email', 'profile'],
     });
   }
 
-  async validate(accessToken: string, refreshToken: string, profile: any, done: VerifyCallback): Promise<any> {
+  async validate(
+    accessToken: string,
+    refreshToken: string,
+    profile: any,
+    done: VerifyCallback
+  ): Promise<any> {
     const { name, emails, id } = profile;
 
     // Check if the user already exists in the database by email
@@ -29,9 +33,9 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       // Create new user if not found
       user = await this.userService.createUserGoogle({
         email: emails[0].value,
-        name: name.givenName ,
+        name: name.givenName,
         password: '123456789',  // No password for Google users
-        level: 'user', // Default level for new users (can be changed)
+        levels: { writing: 0, reading: 0, grammar: 0 },  // Default levels for new users
       });
     }
 

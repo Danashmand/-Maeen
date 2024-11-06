@@ -1,4 +1,3 @@
-// src/auth/auth.service.ts
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../users/users.service';
@@ -11,23 +10,30 @@ export class AuthService {
     private jwtService: JwtService
   ) {}
 
-  async signUp(email: string, password: string, name: string,level:string): Promise<User> {
-
-    return this.userService.createUser(email, password, name,level);
+  // Updated signUp method to expect level as an object
+  async signUp(
+    email: string,
+    password: string,
+    name: string,
+    level: { writing?: number; reading?: number; grammar?: number } // Correct type for level
+  ): Promise<User> {
+    return this.userService.createUser(email, password, name, level);
   }
 
-  async signIn(email: string, password: string): Promise<{  userData: User }> {
+  // signIn method remains unchanged
+  async signIn(email: string, password: string): Promise<{ userData: User }> {
     const user = await this.userService.findByEmail(email);
     if (!user || !(await this.userService.validatePassword(password, user.password))) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const payload = { email: user.email, sub: user._id };
+    const payload = { email: user.email, sub: user._id }; // Assuming 'id' exists on User
     return {
-    
-      userData: user, 
+      userData: user,
     };
   }
+
+  // googleLogin method remains unchanged
   async googleLogin(user: any) {
     const payload = {
       email: user.email,
