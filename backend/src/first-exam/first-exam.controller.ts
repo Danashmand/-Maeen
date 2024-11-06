@@ -10,4 +10,16 @@ export class FirstExamController {
   async create(@Body() createFirstExamDto: CreateFirstExamDto) {
     return this.firstExamService.create(createFirstExamDto);
   }
+
+  @Post('nextQuestion')
+  async nextQuestion(@Body() body: any) {
+    return this.firstExamService.getNextQuestion(
+      body.levels,
+      body.topic,
+      body.newTopic,
+      body.time,
+      body.userActivity,
+      body.answer
+    );
+  }
 }

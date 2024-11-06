@@ -1,22 +1,25 @@
 "use client";
 import React, { useEffect, useState } from 'react';
-import Exam from '../_components/exam';
 import Image from 'next/image';
-import background from '../public/images/Desktop - 4 (1).png';
-import { useRouter } from 'next/navigation';
 import axios from 'axios';
+import { useRouter } from 'next/navigation';
+import Exam from '../_components/exam';
+import background from '../public/images/Desktop - 4 (1).png';
 import PencilIcon from '../public/sidebarIcons/pencil.svg';
 
 const Page = () => {
     const router = useRouter();
+    
+    // State hooks
     const [userData, setUserData] = useState<{ _id: string; name: string; email: string; score: number } | null>(null);
     const [questions, setQuestions] = useState<any[]>([]);
     const [score, setScore] = useState<number | null>(null);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-    const [userLevels, setUserLevels] = useState<{ writing: number; reading: number; grammer: number }>({ writing: 1, reading: 10, grammer: 19 });
-    const [topic, setTopic] = useState('grammer');
+    const [userLevels, setUserLevels] = useState<{ writing: number; reading: number; grammar: number }>({ writing: 1, reading: 10, grammar: 19 });
+    const [topic, setTopic] = useState('grammar');
     const [userActivity, setUserActivity] = useState(0);
 
+    // Fetch user data on mount
     useEffect(() => {
         const fetchUserData = async () => {
             const user = localStorage.getItem("user");
@@ -29,9 +32,16 @@ const Page = () => {
         };
 
         fetchUserData();
-    }, []);
+    }, [router]);
 
-    // Function to start the exam and get the first question
+    // Fetch the first set of questions when the user data is available
+    useEffect(() => {
+        if (userData) {
+            startExam();
+        }
+    }, [userData]);
+
+    // Start the exam by fetching questions from the server
     const startExam = async () => {
         try {
             const response = await axios.post('https://maeen-production.up.railway.app/first-exam', {
@@ -46,30 +56,34 @@ const Page = () => {
         }
     };
 
-    // Handle submitting the answer for the current question
-    const submitAnswer = async (score: number) => {
+    // Handle answer submission
+    const submitAnswer = async (answer: string) => {
         try {
-            setUserLevels((prev) => ({
-                ...prev,
+            setUserLevels(prev => ({
                 writing: prev.writing + 1,  
                 reading: prev.reading + 1,
-                grammer: prev.grammer + 1,
+                grammar: prev.grammar + 1,
             }));
 
-            setUserActivity((prev) => prev + 1);
+            setUserActivity(prev => prev + 1);
 
-            // Simulate submitting the answer (e.g., storing data on the backend)
-            await axios.post('https://maeen-production.up.railway.app/first-exam', {
+            const currentQuestion = questions[currentQuestionIndex];
+            
+            // Send the answer to the backend and fetch the next question
+            const response = await axios.post('https://maeen-production.up.railway.app/nextQuestion', {
                 levels: userLevels,
                 topic: topic,
-                userId: userData?._id,
+                newTopic: currentQuestion.topic,
+                time: 4,  // Example time, adjust as needed
+                userActivity: userActivity,
+                answer: answer,
             });
 
             // If there are more questions, move to the next one
             if (currentQuestionIndex < questions.length - 1) {
                 setCurrentQuestionIndex(currentQuestionIndex + 1);
             } else {
-                // Final score calculation
+                // Final score calculation and handling
                 const finalScore = calculateFinalScore();
                 handleComplete(finalScore);
             }
@@ -80,11 +94,11 @@ const Page = () => {
 
     // Function to calculate the final score (example)
     const calculateFinalScore = () => {
-        return 85;  // Modify this to suit your needs
+        return 85;  // Modify as per the exam logic
     };
 
-    // Handle completing the exam and submitting the final score
-    async function handleComplete(finalScore: number): Promise<void> {
+    // Handle exam completion and update user score
+    const handleComplete = async (finalScore: number) => {
         setScore(finalScore);
         console.log('Final Score:', finalScore);
 
@@ -98,14 +112,7 @@ const Page = () => {
         } catch (error) {
             console.error('Error updating user level:', error);
         }
-    }
-
-    // Start the exam when user data is available
-    useEffect(() => {
-        if (userData) {
-            startExam();
-        }
-    }, [userData]);
+    };
 
     return (
         <div className="relative h-screen w-full overflow-hidden text-right">
@@ -119,7 +126,7 @@ const Page = () => {
                 <div className="bg-white/10 p-8 rounded-[10%] items-center text-center justify-center flex w-[500px] h-[40px]">
                     <h2 className="flex gap-2 text-3xl font-bold">
                         اختبار سريع لتحديد المستوى
-                        <Image src={PencilIcon} alt="Logo" className="" />
+                        <Image src={PencilIcon} alt="Logo" />
                     </h2>
                 </div>
                 <div className="justify-center items-center w-[540px] mr-4">
