@@ -16,8 +16,7 @@ const [loading, setLoading] = useState(false);
 const [userInput, setUserInput] = useState("");
 const messagesEndRef = useRef<null | HTMLDivElement>(null);
 const [userData, setUserData] = useState<{ _id: string; name: string; email: string, score: number ,levels:{writing:number,reading:number,grammer:number} } | null>(null);
-const [chatHistory, setChatHistory] = useState<{ id: string; firstMessage: string; date: string }[]>([]);
-const [chatId, setChatId] = useState<string | null>(null);
+
 const router = useRouter();
 const [colorClass, setColorClass] = useState("text-secondary");
 const [displayedScore, setDisplayedScore] = useState(userData ? userData.score : 0);
@@ -39,101 +38,31 @@ useEffect(() => {
 
 
 
-useEffect(() => {
-  const createNewChatSession = async () => {
 
-    try {
-      const response = await fetch("https://maeen-production.up.railway.app/virtual-teacher/start-session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: userData?._id }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to create a new chat session");
-      }
-
-      const data = await response.json();
-      setChatId(data.ChatId);
-
-      if (data.ChatId) {
-        localStorage.setItem("chatId", data.ChatId);
-      } else {
-        throw new Error("Chat ID not returned from the server");
-      }
-    } catch (error) {
-      console.error("Error creating chat session", error);
-    }
-  };
-
-  if (userData) {
-    createNewChatSession();
-  }
-}, [userData]);
-useEffect(() => {
-  const fetchChatHistory = async () => {
-    if (userData && userData._id) { // Ensure userData and user ID are available
-      try {
-        const response = await fetch(`https://maeen-production.up.railway.app/virtual-teacher/chats/user/${userData._id}`, {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        });
-  
-        if (!response.ok) {
-          throw new Error("Failed to fetch chat history");
-        }
-  
-        const data = await response.json();
-  
- 
-  
-        // Check if data is an array before mapping
-        if (Array.isArray(data)) {
-          const formattedHistory = data.map((chat) => ({
-            id: chat.chatId,
-            firstMessage: chat.messages[0] ? chat.messages[0].text.substring(0, 12) : 'Blank',
-            date: new Date(chat.createdAt).toLocaleDateString(),
-          })).reverse();
-  
-          setChatHistory(formattedHistory);
-        } else {
-          console.error("Expected data to be an array but got:", data);
-        }
-      } catch (error) {
-        console.error("Error fetching chat history:", error);
-      }
-    }
-  };
-  
-  
-
-  fetchChatHistory();
-}, [userData, chatId]);
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
 
   const userPrompt = { createdAt: new Date().toISOString(), prompt: userInput, answer: "" };
-  setChat((prev) => [...prev, userPrompt]); 
+  setChat((prev) => [...prev, userPrompt]);
   setUserInput("");
 
   if (userData) {
-    const newScore = userData.score + 10; // or any other logic for score calculation
-    setUserData({ ...userData, score: newScore }); // Update userData with new score
+    const newScore = userData.score + 10;
+    setUserData({ ...userData, score: newScore });
 
-    // Change color class sequence
     setColorClass("text-green-500");
     setTimeout(() => setColorClass("text-green-500"), 900);
     setTimeout(() => setColorClass("text-secondary"), 2000);
 
-    // Start score increment animation
-    incrementScore(userData.score, newScore, 1000); // Duration in milliseconds
+    incrementScore(userData.score, newScore, 1000);
   }
 
   setLoading(true);
 
   try {
-    if (!chatId) {
-      throw new Error("Chat ID is missing. Please start a new chat session.");
+    if (!userInput || !userData?.levels) {
+      console.error("Missing input or levels data");
+      return; // Exit if data is incomplete
     }
 
     const response = await fetch("https://maeen-production.up.railway.app/spelling-correction/correct", {
@@ -141,16 +70,16 @@ const handleSubmit = async (e: React.FormEvent) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         text: userInput,
-        levels:userData?.levels
+        levels: userData?.levels,
       }),
     });
 
     if (!response.ok) {
-      throw new Error("Failed to fetch teacher response");
+      throw new Error("Failed to fetch teacher response" + response.status);
     }
 
     const data = await response.json();
-    const teacherResponse = { prompt: userInput, answer: formatResponse(data.text) };
+    const teacherResponse = { prompt: userInput, answer: formatResponse(data.correctedText) };
 
     setChat((prev) => {
       const updatedChat = [...prev];

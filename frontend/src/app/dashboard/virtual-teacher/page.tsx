@@ -143,7 +143,6 @@ const [chat, setChat] = useState<{
           prompt: userInput,
           userId: userData?._id,
           chatId: chatId, 
-          
         }),
       });
   
@@ -152,7 +151,7 @@ const [chat, setChat] = useState<{
       }
   
       const data = await response.json();
-      const teacherResponse = { prompt: userInput, answer: formatResponse(data.text) };
+      const teacherResponse = { prompt: "", answer: formatResponse(data.text) };
   
       setChat((prev) => {
         const updatedChat = [...prev];
@@ -213,6 +212,10 @@ const [chat, setChat] = useState<{
 
   const formatResponse = (response: string) => {
     return response
+    
+      
+        .replace(/\bAI\b/g, '').replace(/ AI/g, '').replace(/AI\b/g, '') // Remove AI from the response
+    
         .replace(/(.*?):/g, "<b style='font-weight: 900; font-size: 1.4rem;'>$1</b>:") // Bold the line before the colon
         .replace(/\*\*(.*?)\*\*/g, "<b style='font-weight: 900; font-size: 1.4rem;'>$1</b>") // Bold text wrapped in **
         .replace(/(\d+\.\s+)/g, "<br>$1"); // Add line breaks before numbered lists

@@ -8,27 +8,27 @@ export class FirstExamController {
   constructor(private readonly firstExamService: FirstExamService) {}
 
   @Post()
-  create(@Body() createFirstExamDto: CreateFirstExamDto) {
+  async create(@Body() createFirstExamDto: CreateFirstExamDto) {
     return this.firstExamService.create(createFirstExamDto);
   }
 
   @Get()
-  findAll() {
+  async findAll() {
     return this.firstExamService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.firstExamService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    return this.firstExamService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateFirstExamDto: UpdateFirstExamDto) {
-    return this.firstExamService.update(+id, updateFirstExamDto);
+  async update(@Param('id') id: string, @Body() updateFirstExamDto: UpdateFirstExamDto) {
+    return this.firstExamService.update(id, updateFirstExamDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.firstExamService.remove(+id);
+  async remove(@Param('id') id: string) {
+    return this.firstExamService.remove(id);
   }
 }
