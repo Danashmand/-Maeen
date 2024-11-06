@@ -9,7 +9,7 @@ import PencilIcon from '../public/sidebarIcons/pencil.svg';
 
 const Page = () => {
     const router = useRouter();
-    const [userData, setUserData] = useState<{ _id: string; name: string; email: string, score: number } | null>(null);
+    const [userData, setUserData] = useState<{ _id: string; name: string; email: string; score: number } | null>(null);
     const [questions, setQuestions] = useState<any[]>([]);
     const [score, setScore] = useState<number | null>(null);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -34,62 +34,76 @@ const Page = () => {
     // Function to start the exam and get the first question
     const startExam = async () => {
         try {
-            const response = await axios.post('http://www.maeenmodelserver.site/start-exam', {
+            const response = await axios.post('https://maeen-production.up.railway.app/first-exam', {
                 levels: userLevels,
                 topic: topic,
+                userId: userData?._id,
             });
-            const firstQuestion = response.data;  // Assuming the response contains the first question
-            setQuestions([firstQuestion]); // Set the first question in the questions array
+            const { questions: fetchedQuestions } = response.data;
+            setQuestions(fetchedQuestions);
         } catch (error) {
-            console.error('Error fetching first question:', error);
+            console.error('Error starting exam:', error);
         }
     };
 
-    // Function to get the next question
-    const getNextQuestion = async (answer: boolean) => {
+    // Handle submitting the answer for the current question
+    const submitAnswer = async (score: number) => {
         try {
-            const response = await axios.post('http://www.maeenmodelserver.site/nextQuestion', {
+            setUserLevels((prev) => ({
+                ...prev,
+                writing: prev.writing + 1,  
+                reading: prev.reading + 1,
+                grammer: prev.grammer + 1,
+            }));
+
+            setUserActivity((prev) => prev + 1);
+
+            // Simulate submitting the answer (e.g., storing data on the backend)
+            await axios.post('https://maeen-production.up.railway.app/first-exam', {
                 levels: userLevels,
                 topic: topic,
-                newTopic: topic,  // Assuming the next question is for the same topic
-                time: 4,  // Can be adjusted or dynamically passed if required
-                userActivity: userActivity,
-                answer: answer,
+                userId: userData?._id,
             });
-            const nextQuestion = response.data;  // Assuming the response contains the next question
-            setQuestions((prevQuestions) => [...prevQuestions, nextQuestion]);
-            setCurrentQuestionIndex((prevIndex) => prevIndex + 1); // Move to the next question
+
+            // If there are more questions, move to the next one
+            if (currentQuestionIndex < questions.length - 1) {
+                setCurrentQuestionIndex(currentQuestionIndex + 1);
+            } else {
+                // Final score calculation
+                const finalScore = calculateFinalScore();
+                handleComplete(finalScore);
+            }
         } catch (error) {
-            console.error('Error fetching next question:', error);
+            console.error('Error submitting answer:', error);
         }
     };
 
-    // Handle completing the exam
+    // Function to calculate the final score (example)
+    const calculateFinalScore = () => {
+        return 85;  // Modify this to suit your needs
+    };
+
+    // Handle completing the exam and submitting the final score
     async function handleComplete(finalScore: number): Promise<void> {
         setScore(finalScore);
         console.log('Final Score:', finalScore);
 
         try {
-            // Send score to backend to update user level
-            const response = await axios.post('https://maeen-production.up.railway.app/users/update-user-level', {
+            await axios.post('https://maeen-production.up.railway.app/users/update-user-level', {
                 userId: userData?._id,
                 score: finalScore,
             });
 
-            console.log('User Level Updated:', response.data.level);
-
-            // Optionally redirect to the dashboard or display a success message
             router.push('/dashboard/virtual-teacher');
         } catch (error) {
             console.error('Error updating user level:', error);
-            // Handle the error (e.g., show an error message to the user)
         }
-    };
+    }
 
-    // Start the exam when the component loads
+    // Start the exam when user data is available
     useEffect(() => {
         if (userData) {
-            startExam();  // Start fetching the first question as soon as user data is available
+            startExam();
         }
     }, [userData]);
 
@@ -112,9 +126,9 @@ const Page = () => {
                     {score === null ? (
                         questions.length > 0 && (
                             <Exam
-                                questions={questions}
+                                questions={questions[currentQuestionIndex]} // Pass current question
                                 showCorrectAnswer={false}
-                                onComplete={handleComplete}
+                                onComplete={submitAnswer} // Pass submitAnswer
                             />
                         )
                     ) : (

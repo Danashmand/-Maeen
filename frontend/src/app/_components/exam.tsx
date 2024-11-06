@@ -39,7 +39,8 @@ const Exam: React.FC<ExamProps> = ({ questions, showCorrectAnswer = true, onComp
         setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
         setSelectedOption(null);
       } else {
-        onComplete(score + (option.correct ? 1 : 0)); // Pass the final score to the parent
+        // Pass the final score to the parent (submitAnswer function)
+        onComplete(score + (option.correct ? 1 : 0)); 
       }
     }, 1000);
   };

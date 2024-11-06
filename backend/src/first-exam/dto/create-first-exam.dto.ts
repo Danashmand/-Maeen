@@ -1,5 +1,14 @@
+// create-first-exam.dto.ts
+
+import { IsString, IsObject } from 'class-validator';
+
 export class CreateFirstExamDto {
-  userId: string;
-  levels: { [key: string]: number };  // Levels as an object, e.g., { writing: 1, reading: 10, grammer: 19 }
+  @IsObject()
+  levels: { [key: string]: number }; // Example: { writing: 1, reading: 10, grammar: 19 }
+
+  @IsString()
   topic: string;
+
+  @IsString()
+  userId: string;
 }

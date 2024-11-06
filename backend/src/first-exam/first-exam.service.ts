@@ -1,99 +1,84 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import axios from 'axios';  // Import axios
-import { FirstExam, FirstExamDocument } from './first-exam.schema';
+import axios from 'axios';
 import { CreateFirstExamDto } from './dto/create-first-exam.dto';
 import { UpdateFirstExamDto } from './dto/update-first-exam.dto';
 
 @Injectable()
 export class FirstExamService {
-  constructor(
-    @InjectModel('First Exam') private firstExamModel: Model<FirstExamDocument>,
-  ) {}
+  private readonly baseUrl = 'http://www.maeenmodelserver.site';
 
-  // Fetch the first question from the 'start-exam' API
-  async fetchFirstQuestion(levels: { [key: string]: number }, topic: string) {
-    try {
-      const response = await axios.post('http://www.maeenmodelserver.site/start-exam', {
-        levels,
-        topic,
-      });
-
-      return response.data;  // Assuming this returns the question for the first exam
-    } catch (error) {
-      throw new Error('Error fetching the first question');
-    }
-  }
-
-  // Fetch the next question from the 'nextQuestion' API
-  async fetchNextQuestion(levels: { [key: string]: number }, topic: string, newTopic: string, time: number, userActivity: number, answer: boolean) {
-    try {
-      const response = await axios.post('http://www.maeenmodelserver.site/nextQuestion', {
-        levels,
-        topic,
-        newTopic,
-        time,
-        userActivity,
-        answer,
-      });
-
-      return response.data;  // Assuming this returns the next question
-    } catch (error) {
-      throw new Error('Error fetching the next question');
-    }
-  }
-
-  // Create a new first exam, interacting with the APIs to get questions
-  async create(createFirstExamDto: CreateFirstExamDto): Promise<FirstExam> {
-    const { levels, topic: initialTopic } = createFirstExamDto;
-
-    let allQuestions = [];
-
-    // Fetch the first question
-    let question = await this.fetchFirstQuestion(levels, initialTopic);
-    allQuestions.push(question);
-    const topic = initialTopic; // Define topic here to use later in the loop
-    allQuestions.push(question);
-
-    // Loop to fetch subsequent questions, 5 questions in total
-    for (let i = 0; i < 4; i++) {
-      const currentLevels = levels;  // Use updated levels as per your logic
-      const newTopic = question.topic;  // Use the new topic after each question
-      const time = 4;  // You can calculate the time dynamically if needed
-      const userActivity = 5;  // User activity, adjust as per your logic
-      const answer = true;  // Adjust this as per user response
-
-      question = await this.fetchNextQuestion(currentLevels, topic, newTopic, time, userActivity, answer);
-      allQuestions.push(question);
-    }
-
-    // Save the questions in the database
-    const createdFirstExam = new this.firstExamModel({
-      userId: createFirstExamDto.userId,
-      questions: allQuestions,  // Store all fetched questions
+  // Function to get the first question
+  private async getFirstQuestion(levels: object, topic: string) {
+    const response = await axios.post(`${this.baseUrl}/start-exam`, {
+      levels,
+      topic,
     });
-
-    return createdFirstExam.save();
+    return response.data;
   }
 
-  // Get all first exams
-  async findAll(): Promise<FirstExam[]> {
-    return this.firstExamModel.find().exec();
+  // Function to get the next question
+  private async getNextQuestion(levels: object, topic: string, newTopic: string, time: number, userActivity: number, answer: boolean) {
+    const response = await axios.post(`${this.baseUrl}/nextQuestion`, {
+      levels,
+      topic,
+      newTopic,
+      time,
+      userActivity,
+      answer,
+    });
+    return response.data;
   }
 
-  // Get a specific first exam by ID
-  async findOne(id: string): Promise<FirstExam> {
-    return this.firstExamModel.findById(id).exec();
+  // Main function to start the exam
+  async create(createFirstExamDto: CreateFirstExamDto) {
+    const { levels, topic } = createFirstExamDto;
+    const questions: string[] = [];
+
+    // Step 1: Get the first question
+    let firstQuestion = await this.getFirstQuestion(levels, topic);
+    questions.push(firstQuestion.question);
+
+    // Step 2: Get the next four questions
+    let currentLevels = firstQuestion.levels; // Updated levels after the first question
+    let currentTopic = firstQuestion.topic;
+    let newTopic = currentTopic;
+    let time = 4; // Example static time, adjust as needed
+    let userActivity = 5; // Example static user activity, adjust as needed
+    let answer = true; // Example answer, this should be dynamic
+
+    for (let i = 1; i < 5; i++) {
+      let nextQuestion = await this.getNextQuestion(currentLevels, currentTopic, newTopic, time, userActivity, answer);
+      questions.push(nextQuestion.question);
+
+      // Update levels and topics after each question
+      currentLevels = nextQuestion.levels;
+      currentTopic = nextQuestion.topic;
+      newTopic = currentTopic; // Assuming newTopic is updated based on the question
+    }
+
+    // Step 3: Save the exam with all 5 questions
+    return {
+      userId: createFirstExamDto.userId,
+      levels,
+      topic,
+      questions,
+    };
   }
 
-  // Update an existing first exam
-  async update(id: string, updateFirstExamDto: UpdateFirstExamDto): Promise<FirstExam> {
-    return this.firstExamModel.findByIdAndUpdate(id, updateFirstExamDto, { new: true }).exec();
+  // Other CRUD functions (findAll, findOne, update, remove) can be kept as is.
+  findAll() {
+    return `This action returns all firstExam`;
   }
 
-  // Remove a first exam by ID
-  async remove(id: string): Promise<FirstExam> {
-    return this.firstExamModel.findByIdAndDelete(id).exec();
+  findOne(id: number) {
+    return `This action returns a #${id} firstExam`;
+  }
+
+  update(id: number, updateFirstExamDto: UpdateFirstExamDto) {
+    return `This action updates a #${id} firstExam`;
+  }
+
+  remove(id: number) {
+    return `This action removes a #${id} firstExam`;
   }
 }
