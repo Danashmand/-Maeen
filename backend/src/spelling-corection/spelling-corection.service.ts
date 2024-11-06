@@ -10,22 +10,23 @@ export class SpellingCorrectionService {
   async correctSpelling(question: string, levels: { writing: number; reading: number; grammer: number }): Promise<string> {
     const payload = { question, levels };
 
+    interface ChatbotResponse {
+      AI: string;
+    }
+
     // Log payload for debugging purposes
     console.log('Payload being sent to spelling correction service:', payload);
 
     try {
-      const response: AxiosResponse<{ corrected_text: string }> = await lastValueFrom(
-        this.httpService.post('http://www.maeenmodelserver.site/spelling-correction', payload, {
+      const response: AxiosResponse<ChatbotResponse> = await lastValueFrom(
+        this.httpService.post<ChatbotResponse>('http://www.maeenmodelserver.site/spelling-correction', payload, {
           headers: { 'Content-Type': 'application/json' },
         })
       );
 
-      if (!response.data || !response.data.corrected_text) {
-        console.log('Response from spelling correction service:', response.data, +" " + response.data.corrected_text);
-        throw new Error('No corrected text in response');
-      }
+   
 
-      return response.data.corrected_text;
+      return response.data.AI;
 
     } catch (error) {
       // Detailed logging to help debug
