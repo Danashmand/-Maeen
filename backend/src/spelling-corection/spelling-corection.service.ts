@@ -21,7 +21,7 @@ export class SpellingCorrectionService {
       );
 
       if (!response.data || !response.data.corrected_text) {
-        console.log('Response from spelling correction service:', response.data);
+        console.log('Response from spelling correction service:', response.data, +" " + response.data.corrected_text);
         throw new Error('No corrected text in response');
       }
 
