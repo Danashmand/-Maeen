@@ -7,7 +7,7 @@ import { HttpService } from '@nestjs/axios';
 export class SpellingCorrectionService {
   constructor(private readonly httpService: HttpService) {}
 
-  async correctSpelling(question: string, levels: { writing: number; reading: number; grammar: number }): Promise<string> {
+  async correctSpelling(question: string, levels: { writing: number; reading: number; grammer: number }): Promise<string> {
     const payload = { question, levels };
 
     try {
