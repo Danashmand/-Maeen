@@ -9,13 +9,13 @@ export class SpellingCorrection extends Document {
   @Prop({
     type: Object,
     required: true,
-    default: { writing: 0, reading: 0, grammar: 0 },
+    default: { writing: 0, reading: 0, grammer: 0 },
     validate: {
       validator: (v: any) => {
         return (
           typeof v.writing === 'number' &&
           typeof v.reading === 'number' &&
-          typeof v.grammar === 'number'
+          typeof v.grammer === 'number'
         );
       },
       message: (props: any) => `${props.value} is not a valid levels object!`,
@@ -24,7 +24,7 @@ export class SpellingCorrection extends Document {
   levels: {
     writing: number;
     reading: number;
-    grammar: number;
+    grammer: number;
   };
 }
 

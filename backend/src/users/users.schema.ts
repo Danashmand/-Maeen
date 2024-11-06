@@ -12,7 +12,7 @@ class Levels {
   reading: number;
 
   @Prop({ default: 0 })
-  grammar: number;
+  grammer: number;
 }
 
 const LevelsSchema = SchemaFactory.createForClass(Levels);

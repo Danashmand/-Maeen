@@ -142,7 +142,7 @@ const [chat, setChat] = useState<{
         body: JSON.stringify({
           prompt: userInput,
           userId: userData?._id,
-          chatId: chatId, // Pass chatId in the request
+          serviceType: "ask",
         }),
       });
   

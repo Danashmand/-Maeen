@@ -34,7 +34,7 @@ export class UserController {
 
   @UseGuards(JwtAuthGuard)
   @Patch('me')
-  async updateUser(@Request() req, @Body() updateData: { name?: string; password?: string; levels?: { writing?: number; reading?: number; grammar?: number } }) {
+  async updateUser(@Request() req, @Body() updateData: { name?: string; password?: string; levels?: { writing?: number; reading?: number; grammer?: number } }) {
     const userId = req.user._id;
     return this.userService.updateUser(userId, updateData);
   }
@@ -47,13 +47,13 @@ export class UserController {
   }
 
   @Post('update-user-level')
-  async updateUserLevel(@Body() body: { userId: string; levels: { writing?: number; reading?: number; grammar?: number } }) {
+  async updateUserLevel(@Body() body: { userId: string; levels: { writing?: number; reading?: number; grammer?: number } }) {
     return this.userService.updateUserLevels(body.userId, body.levels);
   }
 
   @Post('create')
   async createUser(
-    @Body() body: { email: string; password: string; name: string; levels?: { writing?: number; reading?: number; grammar?: number }; score?: number },
+    @Body() body: { email: string; password: string; name: string; levels?: { writing?: number; reading?: number; grammer?: number }; score?: number },
   ) {
     const { email, password, name, levels, score } = body;
     return this.userService.createUser(email, password, name, levels, score);

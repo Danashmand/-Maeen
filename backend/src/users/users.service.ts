@@ -12,7 +12,7 @@ export class UserService {
     email: string,
     password: string,
     name: string,
-    levels: { writing?: number; reading?: number; grammar?: number } = {},
+    levels: { writing?: number; reading?: number; grammer?: number } = {},
     score: number = 0,
   ): Promise<User> {
     const existingUser = await this.userModel.findOne({ email });
@@ -55,7 +55,7 @@ export class UserService {
   // Update user data (name, password, levels, score)
   async updateUser(
     id: string,
-    updateData: { name?: string; password?: string; levels?: { writing?: number; reading?: number; grammar?: number }; score?: number },
+    updateData: { name?: string; password?: string; levels?: { writing?: number; reading?: number; grammer?: number }; score?: number },
   ): Promise<User> {
     const user = await this.findById(id);
     if (updateData.password) {
@@ -80,7 +80,7 @@ export class UserService {
   }
 
   // Update user levels based on provided scores
-  async updateUserLevels(userId: string, levelsUpdate: { writing?: number; reading?: number; grammar?: number }): Promise<User> {
+  async updateUserLevels(userId: string, levelsUpdate: { writing?: number; reading?: number; grammer?: number }): Promise<User> {
     const user = await this.userModel.findById(userId);
     if (!user) {
       throw new NotFoundException('User not found');

@@ -15,7 +15,7 @@ export class AuthService {
     email: string,
     password: string,
     name: string,
-    level: { writing?: number; reading?: number; grammar?: number } // Correct type for level
+    level: { writing?: number; reading?: number; grammer?: number } // Correct type for level
   ): Promise<User> {
     return this.userService.createUser(email, password, name, level);
   }
