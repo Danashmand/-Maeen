@@ -6,17 +6,17 @@ export type FirstExamDocument = FirstExam & Document;
 
 @Schema()
 export class FirstExam {
-  @Prop({ required: true })
+  @Prop({ required: false })
   userId: string;
 
-  @Prop({ type: [String], required: true })  // Array of question strings
+  @Prop({ type: [String], required: false })  // Array of question strings
   questions: string[];
 
   // Optional: You can add additional properties if needed, such as the levels or topics
-  @Prop({ type: Object, required: true })
+  @Prop({ type: Object, required: false })
   levels: { [key: string]: number };
 
-  @Prop({ required: true })
+  @Prop({ required: false })
   topic: string;
 
   // You can also store metadata or history of the exam, if required

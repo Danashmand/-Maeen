@@ -42,18 +42,37 @@ const Page = () => {
 
     // Start the exam by fetching the first question from the server
     const startExam = async () => {
-        try {
-            const response = await axios.post('https://maeen-production.up.railway.app/first-exam', {
-                levels: userLevels,
-                topic: topic,
-                userId: userData?._id,
-            });
-            const { questions: fetchedQuestions } = response.data;
-            setQuestions(fetchedQuestions);
-        } catch (error) {
-            console.error('Error starting exam:', error);
-        }
-    };
+      try {
+          const response = await axios.post(
+              'https://maeen-production.up.railway.app/first-exam',
+              {
+                  levels: userLevels,
+                  topic: topic,
+                  userId: userData?._id,
+              },
+              {
+                  headers: {
+                      'Content-Type': 'application/json', // Ensure that the server expects JSON data
+                  }
+              }
+          );
+  
+          // Assuming response.data contains a 'questions' field
+          const { questions: fetchedQuestions } = response.data;
+          setQuestions(fetchedQuestions);
+  
+      } catch (error: unknown) {
+          // Check if the error has a response and log it
+          if (axios.isAxiosError(error) && error.response) {
+              console.error('Error starting exam:', error.response.data); // Log the server's response error
+          } else if (axios.isAxiosError(error) && error.request) {
+              console.error('No response received:', error.request); // Log if there was no response from the server
+          } else {
+              console.error('Error', String((error as Error).message)); // Log other errors
+          }
+      }
+          }
+    
 
     // Handle answer submission and fetch next question
     const submitAnswer = async (answer: string) => {
