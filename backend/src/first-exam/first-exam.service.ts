@@ -8,6 +8,7 @@ export class FirstExamService {
 
   // Function to get the first question
    async getFirstQuestion(levels: object, topic: string) {
+    console.log(levels,topic )
     const response = await axios.post(`${this.baseUrl}/start-exam`, {
       levels,
       topic,
@@ -17,6 +18,8 @@ export class FirstExamService {
 
   // Function to get the next question
    async getNextQuestion(levels: object, topic: string, newTopic: string, time: number, userActivity: number, answer: boolean) {
+    console.log({ levels, topic, newTopic, time, userActivity, answer });
+
     const response = await axios.post(`${this.baseUrl}/nextQuestion`, {
       levels,
       topic,

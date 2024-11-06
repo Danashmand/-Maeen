@@ -15,10 +15,11 @@ interface Question {
 
 // Props for the Exam component
 interface ExamProps {
-  questions: Question[];
-  showCorrectAnswer?: boolean;
-  onComplete: (score: number) => void; // This prop must be included
+  questions: any;
+  showCorrectAnswer: boolean;
+  onComplete: (answer: string) => void;  // Change the parameter to string if necessary
 }
+
 
 const Exam: React.FC<ExamProps> = ({ questions, showCorrectAnswer = true, onComplete }) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -39,8 +40,8 @@ const Exam: React.FC<ExamProps> = ({ questions, showCorrectAnswer = true, onComp
         setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
         setSelectedOption(null);
       } else {
-        // Pass the final score to the parent (submitAnswer function)
-        onComplete(score + (option.correct ? 1 : 0)); 
+        // Pass the final score as a string to the parent
+        onComplete((score + (option.correct ? 1 : 0)).toString()); 
       }
     }, 1000);
   };
@@ -51,7 +52,7 @@ const Exam: React.FC<ExamProps> = ({ questions, showCorrectAnswer = true, onComp
         {currentQuestion.question}
       </h2>
       <div className="flex flex-col gap-3 w-full">
-        {currentQuestion.options.map((option) => (
+        {currentQuestion.options.map((option: Option) => (
           <button
             key={option.id}
             className={`flex justify-between font-bold items-center px-4 py-3 text-md rounded-lg transition-colors

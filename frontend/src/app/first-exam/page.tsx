@@ -19,7 +19,7 @@ const Page = () => {
     const [topic, setTopic] = useState('grammar');
     const [userActivity, setUserActivity] = useState(0);
 
-    // Fetch user data on mount
+    
     useEffect(() => {
         const fetchUserData = async () => {
             const user = localStorage.getItem("user");
