@@ -278,29 +278,44 @@ def getStory(level):
     "Paintbrush", "Giggles", "Playground", "Trees", "Rainbow"]
     random_theme = random.choice(story_themes_english)
     print("Iam printing here our random theme: ",random_theme)
-    
-    prompt = f'''<s>[INST]you are an arabic story teller that writes short stories for children in ARABIC language. The theam of your story should be about: {random_theme}. the child is {lvl} at reading in arabic language. and you can use the grounding to identify the story level
-    write exicting stories that are easy to understand and fun to read. use simple words and make sure the stories are not long.[\INST]
-    [INST] write ONLY ONE story and think step by step[\INST]
-    [INST] your story should be about {level+100} words long[\INST]
-    الطفل: اعطني قصة 
+
+  #Learning rate,  
+  
+    prompt = f'''
+    [INST]
+    You are an Arabic storyteller who writes short, engaging stories with at least 100 words and no longer than
+    175 words for children in ARABIC. 
+
+    - Theme of the story: {random_theme}.
+    - The child’s Arabic reading level: {lvl}. Adapt the story’s language and length accordingly.
+    - Keep the story short, simple, and fun to read.
+
+    IMPORTANT:
+    - Tell ONLY ONE story, and do not continue with any additional stories.
+    - Use clear and simple words appropriate for the child’s reading level.
+    - End the story with the word "النهاية" and nothing further.
+
+    Example Dialogue:
+    الطفل: اعطني قصة
     حاكي القصص: في ليلة جميلة وهادئة، كان القمر يلعب مع النجوم في السماء. رأى طفلًا ينظر إليه من النافذة، فابتسم القمر للطفل. شعر الطفل بالسعادة وضحك، وضحك القمر أيضًا. ومنذ ذلك الحين، كلما شعر الطفل بالحزن، كان ينظر إلى القمر، فيبتسم له ويشعر بالفرح مرة أخرى.
-    </s>
-    <s>الطفل: اعطني قصة: 
-    حاكي القصص: كان هناك أرنب صغير يعيش في الغابة. يوماً ما، شعر بالجوع الشديد ولكنه لم يجد الجزر في مكانه المعتاد. فكر الأرنب قليلاً، ثم استخدم أنفه ليشم الهواء ويبحث عن الجزر. وجد الأرنب حقلاً كبيراً مليئاً بالجزر بعد أن تبع رائحته. أكل الأرنب الجزر وشعر بالسعادة والامتنان لذكائه.
-    </s>
-    <s>الطفل: اعطني قصة
-    حاكي القصص: كانت هناك فراشة صغيرة تحب الطيران في الحديقة. في يوم مشمس، رأت فراشة زهرة جميلة وقررت أن تستريح عليها. شكرت الفراشة الزهرة على رحيقها اللذيذ وألوانها الزاهية. قالت الزهرة للفراشة: "تعالي دائماً لتزوريني." ومنذ ذلك اليوم، كانت الفراشة تزور الزهرة كل يوم وتنشر الفرح في الحديقة.
-    </s>
-    <s>الطفل: اعطني قصة
-    حاكي القصص: '''
+    النهاية
+
+    Execution Instructions:
+    - Think step by step.
+    - Focus on creating one complete story and then stop.
+    - If you do it correctly, you’ll earn 20 dollars.
+
+    [/INST]
+    '''
+
+
+
     #############################################################################
     grounding = proximity_search(lvl, "story")
-    model.params["max_new_tokens"] = level + 100
-    print(level+100)
-    prompt = "__GROUNDING__:\n" + grounding + prompt 
-    respons = model.generate_text(prompt=prompt)
-    return respons
+   # prompt = "GROUNDING:\n" + grounding + prompt 
+    response = model.generate_text(prompt=prompt)
+    return response
+
 #############################################################################
 #############################################################################
 #######################  <flask routes below> ###############################
