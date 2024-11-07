@@ -22,7 +22,7 @@ def get_credentials():
 # Get project_id and space_id from environment variables
 project_id = "da2e1438-1e80-4b85-9c22-7565678d1498"
 space_id = os.getenv("SPACE_ID")
-# topics: writing, reading, grammar
+# topics: writing, reading, grammer
 # Initialize Watson API client
 wml_credentials = get_credentials()
 client = APIClient(wml_credentials=wml_credentials)
@@ -37,7 +37,7 @@ model_id = "sdaia/allam-1-13b-instruct"
 parameters = {
     "decoding_method": "greedy",
     "min_new_tokens": 10,
-    "max_new_tokens": 100,
+    "max_new_tokens": 150,
     "repetition_penalty": 1,
     "temperature": 2,
     "top_p": 1.0,
@@ -71,27 +71,23 @@ task_config = {
         "collection_name": "chat_collection",
         "vector_index_id": "3c606a27-142c-4b67-8bbd-73501ee27d02",
         "top_k": 3
+    },
+    "story": {
+        "collection_name": "story_collection",
+        "vector_index_id": "7c110277-f075-41e5-93ba-dcee4d43cc67",
+        "top_k": 3
     }
 }
 
 base_prompts = {
     "spelling_check": 
-        '''You are a dedicated spell checker, assisting a young Arabic learner with spelling corrections only. Follow these rules strictly to ensure consistency:
-
-Instructions
-Primary Task: Your sole responsibility is to review the text provided by the child for spelling errors and correct them if present. Avoid any responses unrelated to spelling.
-
-Praise for Error-Free Sentences: If the child’s sentence contains no spelling mistakes, praise their effort.
-
-Error Correction with Explanation:
-
-If you find a spelling error, correct it and clearly explain the reason behind the mistake.
-Provide guidance on how to avoid similar errors in the future. Use a formal tone that is child-friendly.
-No Additional Responses: Do not respond to any non-spell-checking questions. If the user asks an unrelated question, reply with:
+        '''
+        [role]You are a dedicated spell checker, assisting a young Arabic learner with spelling corrections only.[/role]
+        [INST]Given a text you should correct the spelling mistake if exist, else you should praise the child for the effort.
+        Use a formal tone that is child-friendly.[/INST]
+        [INST]
 "أهلا، ماهي الجملة التي تريد مني تصحيحها😉🔎"
 Then, wait for the child to provide a new sentence for spelling review.
-
-Clarification: If any part of these instructions is unclear, ask a specific question. If everything is understood, type only "فهمت" on the screen without any additional text.
 
 Focus on Spell-Checking Only: Do not engage in discussions or respond to any other topic under any circumstances.
 
@@ -100,10 +96,8 @@ Reminder: After providing your spell-checking feedback, end your response there 
 Example Interaction:
 
 Child’s Input: "أريد أن أذهب إلى المدرسه."
-Your Response: "أحسنت! لا توجد أخطاء إملائية في جملتك." (if correct)
-OR
 "الكلمة الصحيحة هي 'المدرسة'. يجب أن تحتوي على تاء مربوطة في النهاية. تذكر دائماً استخدام التاء المربوطة في الكلمات التي تعني مكاناً، مثل مدرسة."
-Note: Keep your responses precise and focused only on spelling, ensuring the child receives clear, accurate feedback.''',
+* Note: Keep your responses precise and focused only on spelling, ensuring the child receives clear, accurate feedback.''',
     
     "question_generation": "You are an AI model that generates a multiple-choice question for children learning Arabic.",
     
@@ -164,7 +158,7 @@ def hydrate_chromadb(task):
     print(f"Hydration complete for '{task}' collection.")
     return collection
 
-# Function to perform proximity search
+# Function to perform proximity search (use immediatlly without getting the collectoin from hydrate_chromadb)
 def proximity_search(question, task):
     config = task_config.get(task)
     if not config:
@@ -190,7 +184,7 @@ def build_chat_prompt(task, question, levels, context):
     if not base_prompt:
         raise ValueError(f"Task '{task}' not recognized.")
     if task == "chat":
-        lvl = stringify(levels["grammar"])
+        lvl = stringify(levels["grammer"])
     elif task == "spelling_check":
         lvl = stringify(levels["writing"])
 
@@ -200,8 +194,9 @@ def build_chat_prompt(task, question, levels, context):
 # Chat function
 def chat(question, levels, task, MAX_HISTORY_TURNS=4):
     
-    print("chat function")
+    # print("chat function")
     conversation_history = session.get("conversation_history", [])
+    #############################################################################
     proximity_context = proximity_search(question, task)
     prompt = build_chat_prompt(task, question, levels, proximity_context)
     print(prompt)
@@ -215,8 +210,10 @@ def chat(question, levels, task, MAX_HISTORY_TURNS=4):
     session["conversation_history"] = conversation_history
     return generated_response
 
+
+# function to learn the level of the user through the exam answers
 def updateLevel(answer, time, level, activity):
-    # Sensitivity decay parameters
+    # Sensitivity decay parameters for learning 
     initial_sensitivity = 20  
     minimum_sensitivity = 0.5 
     decay_factor = 0.75 
@@ -224,8 +221,6 @@ def updateLevel(answer, time, level, activity):
     sensitivity = max(minimum_sensitivity, initial_sensitivity * (decay_factor ** activity))
     # 20 at first
     # 15 at second, 11 at third,...
-    
-    
     if answer:
         # Faster correct answers give higher score
         score = (20 - time) / 10 if time < 20 else 0.5 #from 2 - 0.5
@@ -238,27 +233,20 @@ def updateLevel(answer, time, level, activity):
     level = min(max(level, 1), 100)
     return level
 
+# Function to generate a question based on exam topic and user level
 def getQuestion(levels,topic): 
     lvl = stringify(levels[topic])
         
-    role_instruction = '''You are an AI model that generate a quesiton for kids about foundation of arabic language to examine thier level of understanding
-    - the questions should be in arabic and easy to understand
-    - all the questions should be MCQ questions with four choices each 
-    - the correct answer should be the first one
-    - you are given a context about the topic to help you generate the questions
-    - you are also given the shild's level to generate questions based on his level
-    - you must write the question in arabic inside JSON object with the following format:
-    - the question should be releavent to the topic
-    Example of beginner level question:
-    {"question" : "ما هي الفاكهة بين الخيارات التالية؟","answers" : ["التفاح","الكرسي","الكتاب","الهاتف"]}
-    note that the first answer is the correct one
-    Example of expert level question:
-    {"question" : "كيف تكتب كلمة الهمزة في كلمة أزهار؟","answers" : ["على الألف","على السطر","على الياء","على الواو"]}
+    role_instruction = f''' promptpromptprompt... 
+    
+    
     '''
     
     prompt = f'''
     [INST] {role_instruction} [/INST]
     '''
+    #############################################################################
+
     proximity_context = proximity_search(topic, "question_generation")
     prompt += f"Context: {proximity_context}\n"
     prompt += f"Level: {lvl}\n"
@@ -266,7 +254,7 @@ def getQuestion(levels,topic):
     generated_response = model.generate_text(prompt=prompt)
     return generated_response
 
-# Function to stringify user level
+# Function to stringify user level to fed it into the model
 def stringify(level):
     if level < 0:
         raise ValueError("Level cannot be negative")
@@ -277,26 +265,42 @@ def stringify(level):
     elif level < 60:
         return "intermediate"
     elif level < 80:
-        return "intermediate to expert"
+        return "intermediate to advanced"
     else:
-        return "expert"
+        return "advanced"
 
 def getStory(level):
-    lvl = stringify(level)
-    prompt = '''you are an arabic story teller that writes short stories for children in ARABIC language. the child is {lvl} at reading in arabic language.
-    write exicting stories that are easy to understand and fun to read. use simple words and make sure the stories are not long.
+    lvl = stringify(level)   
+     
+    story_themes_english = [
+    "Library", "Colors", "Raindrop", "Bee", "Wind", "Shadow", "Moon", "Toys", 
+    "Sea", "Chair", "Friendship", "Cloud", "Time", "Potion", "Animals", 
+    "Paintbrush", "Giggles", "Playground", "Trees", "Rainbow"]
+    random_theme = random.choice(story_themes_english)
+    print("Iam printing here our random theme: ",random_theme)
+    
+    prompt = f'''<s>[INST]you are an arabic story teller that writes short stories for children in ARABIC language. The theam of your story should be about: {random_theme}. the child is {lvl} at reading in arabic language. and you can use the grounding to identify the story level
+    write exicting stories that are easy to understand and fun to read. use simple words and make sure the stories are not long.[\INST]
+    [INST] write ONLY ONE story and think step by step[\INST]
+    [INST] your story should be about {level+100} words long[\INST]
     الطفل: اعطني قصة 
     حاكي القصص: في ليلة جميلة وهادئة، كان القمر يلعب مع النجوم في السماء. رأى طفلًا ينظر إليه من النافذة، فابتسم القمر للطفل. شعر الطفل بالسعادة وضحك، وضحك القمر أيضًا. ومنذ ذلك الحين، كلما شعر الطفل بالحزن، كان ينظر إلى القمر، فيبتسم له ويشعر بالفرح مرة أخرى.
-    الطفل: اعطني قصة: 
+    </s>
+    <s>الطفل: اعطني قصة: 
     حاكي القصص: كان هناك أرنب صغير يعيش في الغابة. يوماً ما، شعر بالجوع الشديد ولكنه لم يجد الجزر في مكانه المعتاد. فكر الأرنب قليلاً، ثم استخدم أنفه ليشم الهواء ويبحث عن الجزر. وجد الأرنب حقلاً كبيراً مليئاً بالجزر بعد أن تبع رائحته. أكل الأرنب الجزر وشعر بالسعادة والامتنان لذكائه.
-    الطفل: اعطني قصة
+    </s>
+    <s>الطفل: اعطني قصة
     حاكي القصص: كانت هناك فراشة صغيرة تحب الطيران في الحديقة. في يوم مشمس، رأت فراشة زهرة جميلة وقررت أن تستريح عليها. شكرت الفراشة الزهرة على رحيقها اللذيذ وألوانها الزاهية. قالت الزهرة للفراشة: "تعالي دائماً لتزوريني." ومنذ ذلك اليوم، كانت الفراشة تزور الزهرة كل يوم وتنشر الفرح في الحديقة.
-    الطفل: اعطني قصة
+    </s>
+    <s>الطفل: اعطني قصة
     حاكي القصص: '''
-    model.params["random_seed"] = random.randint(1, 12451)
+    #############################################################################
+    grounding = proximity_search(lvl, "story")
+    model.params["max_new_tokens"] = level + 100
+    print(level+100)
+    prompt = "__GROUNDING__:\n" + grounding + prompt 
     respons = model.generate_text(prompt=prompt)
     return respons
-    
 #############################################################################
 #############################################################################
 #######################  <flask routes below> ###############################
@@ -381,3 +385,7 @@ def sendStory():
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
 
+
+
+
+#  [END]
