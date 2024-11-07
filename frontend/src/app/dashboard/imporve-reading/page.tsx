@@ -56,7 +56,7 @@ function Page() {
     setLoading(true);
 
     try {
-      const levels = { writing: userData?.levels.writing, reading: userData?.levels.reading, grammar: 3 }; // Adjusted to use an object directly
+      const levels = { writing: 4, reading: 4, grammar: 3 }; // Adjusted to use an object directly
       console.log(levels)
       const response = await fetch(
         `https://maeen-production.up.railway.app/improve-reading/data`, {

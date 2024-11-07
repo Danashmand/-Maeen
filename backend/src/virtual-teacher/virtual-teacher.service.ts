@@ -113,7 +113,7 @@ export class VirtualTeacherService {
       levels: {
         writing: user.levels.writing || 0,
         reading: user.levels.reading || 0,
-        grammar: user.levels.grammar || 0,
+        grammer: user.levels.grammar || 0,
       },
     };
 
