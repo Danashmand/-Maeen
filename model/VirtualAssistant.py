@@ -81,11 +81,18 @@ task_config = {
 
 base_prompts = {
     "spelling_check": 
-        '''
-        [role]You are a dedicated spell checker, assisting a young Arabic learner with spelling corrections only.[/role]
-        [INST]Given a text you should correct the spelling mistake if exist, else you should praise the child for the effort.
-        Use a formal tone that is child-friendly.[/INST]
-        [INST]
+        '''You are a dedicated spell checker, assisting a young Arabic learner with spelling corrections only. Follow these rules strictly to ensure consistency:
+
+Instructions
+Primary Task: Your sole responsibility is to review the text provided by the child for spelling errors and correct them if present. Avoid any responses unrelated to spelling.
+
+Praise for Error-Free Sentences: If the child’s sentence contains no spelling mistakes, praise their effort.
+
+Error Correction with Explanation:
+
+If you find a spelling error, correct it and clearly explain the reason behind the mistake.
+Provide guidance on how to avoid similar errors in the future. Use a formal tone that is child-friendly.
+No Additional Responses: Do not respond to any non-spell-checking questions. If the user asks an unrelated question, reply with:
 "أهلا، ماهي الجملة التي تريد مني تصحيحها😉🔎"
 Then, wait for the child to provide a new sentence for spelling review.
 
@@ -237,9 +244,19 @@ def updateLevel(answer, time, level, activity):
 def getQuestion(levels,topic): 
     lvl = stringify(levels[topic])
         
-    role_instruction = f''' promptpromptprompt... 
-    
-    
+    role_instruction = '''You are an AI model that generate a quesiton for kids about foundation of arabic language to examine thier level of understanding
+    - the questions should be in arabic and easy to understand
+    - all the questions should be MCQ questions with four choices each 
+    - the correct answer should be the first one
+    - you are given a context about the topic to help you generate the questions
+    - you are also given the shild's level to generate questions based on his level
+    - you must write the question in arabic inside JSON object with the following format:
+    - the question should be releavent to the topic
+    Example of beginner level question:
+    {"question" : "ما هي الفاكهة بين الخيارات التالية؟","answers" : ["التفاح","الكرسي","الكتاب","الهاتف"]}
+    note that the first answer is the correct one
+    Example of expert level question:
+    {"question" : "كيف تكتب كلمة الهمزة في كلمة أزهار؟","answers" : ["على الألف","على السطر","على الياء","على الواو"]}
     '''
     
     prompt = f'''
@@ -279,45 +296,42 @@ def getStory(level):
     random_theme = random.choice(story_themes_english)
     print("Iam printing here our random theme: ",random_theme)
 
+  #Learning rate,  
   
     prompt = f'''
-    [INST]
-    You are an Arabic storyteller who writes short, engaging stories with at least 100 words and no longer than
-    175 words for children in ARABIC. 
+[INST]
+You are an Arabic storyteller who writes short, engaging stories with at least 100 words and no longer than
+175 words for children in ARABIC. 
 
-    Execution Instructions:
-    - Think step by step.
-    - Focus on creating one complete story and then stop.
-    - If you do it correctly, you’ll earn 20 dollars.
-    
-    - Theme of the story: {random_theme}.
-    - The child’s Arabic reading level: {lvl}. Adapt the story’s language and length accordingly.
-    - Keep the story short, simple, and fun to read.
+- Theme of the story: {random_theme}.
+- The child’s Arabic reading level: {lvl}. Adapt the story’s language and length accordingly.
+- Keep the story short, simple, and fun to read.
 
-    IMPORTANT:
-    - Tell ONLY ONE story, and do not continue with any additional stories.
-    - Use clear and simple words appropriate for the child’s reading level.
-    - End the story with the word "النهاية" and nothing further.
+IMPORTANT:
+- Tell ONLY ONE story, and do not continue with any additional stories.
+- Use clear and simple words appropriate for the child’s reading level.
+- End the story with the word "النهاية" and nothing further.
 
+Example Dialogue:
+الطفل: اعطني قصة
+حاكي القصص: في ليلة جميلة وهادئة، كان القمر يلعب مع النجوم في السماء. رأى طفلًا ينظر إليه من النافذة، فابتسم القمر للطفل. شعر الطفل بالسعادة وضحك، وضحك القمر أيضًا. ومنذ ذلك الحين، كلما شعر الطفل بالحزن، كان ينظر إلى القمر، فيبتسم له ويشعر بالفرح مرة أخرى.
+النهاية
 
-    [/INST]
-    
-    Example Dialogue:
-    الطفل: اعطني قصة
-    حاكي القصص: في ليلة جميلة وهادئة، كان القمر يلعب مع النجوم في السماء. رأى طفلًا ينظر إليه من النافذة، فابتسم القمر للطفل. شعر الطفل بالسعادة وضحك، وضحك القمر أيضًا. ومنذ ذلك الحين، كلما شعر الطفل بالحزن، كان ينظر إلى القمر، فيبتسم له ويشعر بالفرح مرة أخرى.
-    النهاية
-    الطفل: اعطني قصة
-    حاكي القصص: 
-    '''
+Execution Instructions:
+- Think step by step.
+- Focus on creating one complete story and then stop.
+- If you do it correctly, you’ll earn 20 dollars.
+
+[/INST]
+'''
 
 
 
     #############################################################################
     grounding = proximity_search(lvl, "story")
    # prompt = "GROUNDING:\n" + grounding + prompt 
-    response = model.generate_text(prompt=prompt)
-    return response
-
+    respons = model.generate_text(prompt=prompt)
+    return respons
 #############################################################################
 #############################################################################
 #######################  <flask routes below> ###############################
@@ -401,8 +415,3 @@ def sendStory():
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
-
-
-
-
-#  [END]
