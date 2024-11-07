@@ -5,12 +5,12 @@ import axios from 'axios';
 import { ImproveReading } from './improve-reading.schema';
 
 @Injectable()
-export class ImporveReadingService {
+export class ImproveReadingService {
   constructor(
     @InjectModel(ImproveReading.name) private improveReadingModel: Model<ImproveReading>,
   ) {}
 
-  async getImproveReadingData( levels: { writing: number; reading: number; grammer: number } ): Promise<ImproveReading[]> {
+  async getImproveReadingData(levels: { writing: number; reading: number; grammar: number }): Promise<ImproveReading[]> {
     try {
       const response = await axios.post(
         'https://www.maeenmodelserver.site/story',
@@ -18,18 +18,16 @@ export class ImporveReadingService {
         { headers: { 'Content-Type': 'application/json' } },
       );
 
-      const improveReadingData = response.data; 
+      const improveReadingData = response.data;
 
-    
-      const entries = improveReadingData.map(
-        (entry: any) => new this.improveReadingModel(entry),
-      );
-      await this.improveReadingModel.insertMany(entries);
+      // Directly insert the data received from the API into MongoDB
+      await this.improveReadingModel.insertMany(improveReadingData);
 
-      return entries;
+      // Return the inserted data as an array of ImproveReading documents
+      return improveReadingData;
     } catch (error) {
       throw new HttpException(
-        'Failed to fetch improve reading data from external API ' +levels,
+        `Failed to fetch improve reading data from external API: ${error.message}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
