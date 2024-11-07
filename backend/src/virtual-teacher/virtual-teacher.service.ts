@@ -104,7 +104,7 @@ export class VirtualTeacherService {
     return this.virtualTeacherModel.findOne({ chatId });
   }
 
-  private async getChatbotResponse(prompt: string, userId: string, serviceType: 'ask' | 'spelling-correction'): Promise<string> {
+  private async getChatbotResponse(prompt: string, userId: string, serviceType: 'ask' ): Promise<string> {
     const user = await this.userModel.findById(userId);
     if (!user) throw new Error('User not found');
     
@@ -117,9 +117,7 @@ export class VirtualTeacherService {
       },
     };
   
-    const endpoint = serviceType === 'spelling-correction' 
-      ? 'http://www.maeenmodelserver.site/spelling-correction' 
-      : 'http://www.maeenmodelserver.site/ask';
+    const endpoint =  'http://www.maeenmodelserver.site/ask';
   
     try {
       const response: AxiosResponse<ChatbotResponse> = await lastValueFrom(
