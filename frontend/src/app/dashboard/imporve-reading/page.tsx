@@ -189,6 +189,14 @@ function Page() {
           </button>
         </form>
       </div>
+      
+<div className="bg-gradient-to-b from-primary to-secondary2  p-8 rounded-[10%] items-center text-center justify-center flex w-80 mx-4 mt-40 h-2/3  ">
+
+<h2 className="flex gap-1 text-3xl font-bold" dir="rtl"> 
+القراءة وسيلتك للارتقاء!
+</h2>
+
+</div>
     </div>
   );
 }
