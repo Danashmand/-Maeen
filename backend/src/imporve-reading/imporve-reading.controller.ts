@@ -9,7 +9,8 @@ export class ImporveReadingController {
   @Get('data')
   async getImproveReading(@Query('levels') levels: { writing: number; reading: number; grammer: number } ): Promise<ImproveReading[]> {
     if (!levels) {
-      throw new HttpException('Levels parameter is required', HttpStatus.BAD_REQUEST);
+      
+      throw new HttpException('Levels parameter is required ' + levels, HttpStatus.BAD_REQUEST);
     }
 
     return this.imporveReadingService.getImproveReadingData(levels);
