@@ -2,16 +2,19 @@ import { Controller, Post, Body, HttpException, HttpStatus } from '@nestjs/commo
 import { ImproveReadingService } from './imporve-reading.service';
 import { ImproveReading } from './improve-reading.schema';
 
-@Controller('imporve-reading')
-export class ImporveReadingController {
-  constructor(private readonly imporveReadingService: ImproveReadingService) {}
+@Controller('improve-reading') // Fixed the spelling here as well
+export class ImproveReadingController {
+  constructor(private readonly improveReadingService: ImproveReadingService) {}
 
   @Post('data')
-  async getImproveReading(@Body('levels') levels: { writing: number; reading: number; grammar: number }): Promise<ImproveReading[]> {
-    if (!levels) {
-      throw new HttpException('Levels parameter is required', HttpStatus.BAD_REQUEST);
+  async getImproveReading(@Body('levels') levels: { writing: number; reading: number; grammar: number }) {
+    if (!levels || !levels.writing || !levels.reading || !levels.grammar) {
+      throw new HttpException('Levels parameter is required with all fields', HttpStatus.BAD_REQUEST);
     }
 
-    return this.imporveReadingService.getImproveReadingData(levels);
+    const result = await this.improveReadingService.getImproveReadingData(levels);
+
+    // Return the result with inserted data and story content
+    return result; // Now this will return both inserted data and story content
   }
 }
