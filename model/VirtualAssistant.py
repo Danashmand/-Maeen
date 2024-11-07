@@ -22,7 +22,7 @@ def get_credentials():
 # Get project_id and space_id from environment variables
 project_id = "da2e1438-1e80-4b85-9c22-7565678d1498"
 space_id = os.getenv("SPACE_ID")
-# topics: writing, reading, grammer
+# topics: writing, reading, grammar
 # Initialize Watson API client
 wml_credentials = get_credentials()
 client = APIClient(wml_credentials=wml_credentials)
@@ -37,7 +37,7 @@ model_id = "sdaia/allam-1-13b-instruct"
 parameters = {
     "decoding_method": "greedy",
     "min_new_tokens": 10,
-    "max_new_tokens": 150,
+    "max_new_tokens": 250,
     "repetition_penalty": 1,
     "temperature": 2,
     "top_p": 1.0,
@@ -184,7 +184,7 @@ def build_chat_prompt(task, question, levels, context):
     if not base_prompt:
         raise ValueError(f"Task '{task}' not recognized.")
     if task == "chat":
-        lvl = stringify(levels["grammer"])
+        lvl = stringify(levels["grammar"])
     elif task == "spelling_check":
         lvl = stringify(levels["writing"])
 
@@ -279,13 +279,17 @@ def getStory(level):
     random_theme = random.choice(story_themes_english)
     print("Iam printing here our random theme: ",random_theme)
 
-  #Learning rate,  
   
     prompt = f'''
     [INST]
     You are an Arabic storyteller who writes short, engaging stories with at least 100 words and no longer than
     175 words for children in ARABIC. 
 
+    Execution Instructions:
+    - Think step by step.
+    - Focus on creating one complete story and then stop.
+    - If you do it correctly, you’ll earn 20 dollars.
+    
     - Theme of the story: {random_theme}.
     - The child’s Arabic reading level: {lvl}. Adapt the story’s language and length accordingly.
     - Keep the story short, simple, and fun to read.
@@ -295,17 +299,15 @@ def getStory(level):
     - Use clear and simple words appropriate for the child’s reading level.
     - End the story with the word "النهاية" and nothing further.
 
+
+    [/INST]
+    
     Example Dialogue:
     الطفل: اعطني قصة
     حاكي القصص: في ليلة جميلة وهادئة، كان القمر يلعب مع النجوم في السماء. رأى طفلًا ينظر إليه من النافذة، فابتسم القمر للطفل. شعر الطفل بالسعادة وضحك، وضحك القمر أيضًا. ومنذ ذلك الحين، كلما شعر الطفل بالحزن، كان ينظر إلى القمر، فيبتسم له ويشعر بالفرح مرة أخرى.
     النهاية
-
-    Execution Instructions:
-    - Think step by step.
-    - Focus on creating one complete story and then stop.
-    - If you do it correctly, you’ll earn 20 dollars.
-
-    [/INST]
+    الطفل: اعطني قصة
+    حاكي القصص: 
     '''
 
 
