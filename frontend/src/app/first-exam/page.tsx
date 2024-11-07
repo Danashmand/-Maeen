@@ -89,63 +89,63 @@ const Page = () => {
             }
         }
     };
-    const submitAnswer = async (answer: string) => {
-      try {
-          setUserLevels(prev => ({
-              writing: prev.writing + 1,  
-              reading: prev.reading + 1,
-              grammar: prev.grammar + 1,
-          }));
+const submitAnswer = async (answer: string) => {
+        try {
+            setUserLevels(prev => ({
+                writing: prev.writing + 1,  
+                reading: prev.reading + 1,
+                grammar: prev.grammar + 1,
+            }));
 
-          setUserActivity(prev => prev + 1);
+            setUserActivity(prev => prev + 1);
 
-          const currentQuestion = questions[currentQuestionIndex];
-          
-          // Send the answer to the backend and fetch the next question
-          const response = await axios.post('https://maeen-production.up.railway.app/nextQuestion', {
-              levels: userLevels,
-              topic: topic,
-              newTopic: currentQuestion.topic,
-              time: 4,  // Example time, adjust as needed
-              userActivity: userActivity,
-              answer: answer,
-          });
+            const currentQuestion = questions[currentQuestionIndex];
+            
+            // Send the answer to the backend and fetch the next question
+            const response = await axios.post('https://maeen-production.up.railway.app/nextQuestion', {
+                levels: userLevels,
+                topic: topic,
+                newTopic: currentQuestion.topic,
+                time: 4,  // Example time, adjust as needed
+                userActivity: userActivity,
+                answer: answer,
+            });
 
-          // If there are more questions, move to the next one
-          if (response.data && response.data.question) {
-              setQuestions(prev => [...prev, response.data]); // Append the next question
-              setCurrentQuestionIndex(prevIndex => prevIndex + 1); // Move to the next question
-          } else {
-              // Final score calculation and handling
-              const finalScore = calculateFinalScore();
-              handleComplete(finalScore);
-          }
-      } catch (error) {
-          console.error('Error submitting answer:', error);
-      }
-  };
+            // If there are more questions, move to the next one
+            if (response.data && response.data.question) {
+                setQuestions(prev => [...prev, response.data]); // Append the next question
+                setCurrentQuestionIndex(prevIndex => prevIndex + 1); // Move to the next question
+            } else {
+                // Final score calculation and handling
+                const finalScore = calculateFinalScore();
+                handleComplete(finalScore);
+            }
+        } catch (error) {
+            console.error('Error submitting answer:', error);
+        }
+    };
 
-  // Function to calculate the final score (example)
-  const calculateFinalScore = () => {
-      return 85;  // Modify as per the exam logic
-  };
+    // Function to calculate the final score (example)
+    const calculateFinalScore = () => {
+        return 85;  // Modify as per the exam logic
+    };
 
-  // Handle exam completion and update user score
-  const handleComplete = async (finalScore: number) => {
-      setScore(finalScore);
-      console.log('Final Score:', finalScore);
+    // Handle exam completion and update user score
+    const handleComplete = async (finalScore: number) => {
+        setScore(finalScore);
+        console.log('Final Score:', finalScore);
 
-      try {
-          await axios.post('https://maeen-production.up.railway.app/users/update-user-level', {
-              userId: userData?._id,
-              score: finalScore,
-          });
+        try {
+            await axios.post('https://maeen-production.up.railway.app/users/update-user-level', {
+                userId: userData?._id,
+                score: finalScore,
+            });
 
-          router.push('/dashboard/virtual-teacher');
-      } catch (error) {
-          console.error('Error updating user level:', error);
-      }
-  };
+            router.push('/dashboard/virtual-teacher');
+        } catch (error) {
+            console.error('Error updating user level:', error);
+        }
+    };
 
     return (
         <div className="relative h-screen w-full overflow-hidden text-right">
@@ -185,3 +185,7 @@ const Page = () => {
 };
  
 export default Page;
+function setUserActivity(arg0: (prev: any) => any) {
+    throw new Error('Function not implemented.');
+}
+
