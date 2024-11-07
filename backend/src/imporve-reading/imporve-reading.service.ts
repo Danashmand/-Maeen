@@ -18,7 +18,7 @@ export class ImproveReadingService {
       const response: AxiosResponse<ImproveReading[]> = await lastValueFrom(
         this.httpService.post<ImproveReading[]>(
           'http://www.maeenmodelserver.site/story',
-           levels ,
+           {levels} ,
           { headers: { 'Content-Type': 'application/json' } },
         ),
       );
