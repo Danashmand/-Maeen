@@ -13,7 +13,7 @@ export class ImporveReadingService {
   async getImproveReadingData( levels: { writing: number; reading: number; grammer: number } ): Promise<ImproveReading[]> {
     try {
       const response = await axios.post(
-        'https://maeen-production.up.railway.app/story',
+        'https://www.maeenmodelserver.site/story',
         { levels },
         { headers: { 'Content-Type': 'application/json' } },
       );
