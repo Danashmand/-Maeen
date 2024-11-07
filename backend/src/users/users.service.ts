@@ -12,7 +12,7 @@ export class UserService {
     email: string,
     password: string,
     name: string,
-    levels: { writing?: number; reading?: number; grammar?: number } = {},
+    levels: { writing?: number; reading?: number; grammar?: number } = {writing:3, reading:4, grammar:3},
     score: number = 0,
   ): Promise<User> {
     const existingUser = await this.userModel.findOne({ email });

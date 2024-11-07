@@ -36,14 +36,13 @@ function Page() {
 
     fetchUserData();
   }, []);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+  
     const userPrompt = { createdAt: new Date().toISOString(), prompt: userInput, answer: "" };
     setChat((prev) => [...prev, userPrompt]);
     setUserInput("");
-
+  
     if (userData) {
       const newScore = userData.score + 10;
       setUserData({ ...userData, score: newScore });
@@ -52,30 +51,32 @@ function Page() {
       setTimeout(() => setColorClass("text-secondary"), 2000);
       incrementScore(userData.score, newScore, 1000);
     }
-
+  
     setLoading(true);
-
+  
     try {
-      const levels = { writing: 4, reading: 4, grammar: 3 }; // Adjusted to use an object directly
-      console.log(levels)
+const realLevels ={ writing: 3, reading: 4, grammar:  userData?.levels.grammar};
+console.log( userData?.levels);
+      console.log(realLevels);
+  
       const response = await fetch(
         `https://maeen-production.up.railway.app/improve-reading/data`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ levels }), // Adjusted to pass the levels directly in the body
+          body: JSON.stringify({ levels: realLevels }), 
         }
       );
-
+  
       if (!response.ok) {
         throw new Error("Failed to fetch teacher response");
       }
-
+  
       const data = await response.json();
-
+  
       const teacherResponse = { prompt: userInput, answer: formatResponse(data.storyContent) };
-
+  
       setChat((prev) => {
         const updatedChat = [...prev];
         updatedChat[updatedChat.length - 1].answer = teacherResponse.answer;
@@ -88,6 +89,7 @@ function Page() {
       scrollToBottom();
     }
   };
+  
 
   const incrementScore = (start: number, end: number, duration: number) => {
     const totalSteps = 10;
