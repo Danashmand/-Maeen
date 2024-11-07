@@ -27,7 +27,7 @@ export class ImproveReadingService {
       return improveReadingData;
     } catch (error) {
       throw new HttpException(
-        `Failed to fetch improve reading data from external API: ${error.message}`,
+        `Failed to fetch improve reading data from external API: ${error.message}` + levels,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
