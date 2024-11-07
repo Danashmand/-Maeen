@@ -10,7 +10,7 @@ export class ImporveReadingService {
     @InjectModel(ImproveReading.name) private improveReadingModel: Model<ImproveReading>,
   ) {}
 
-  async getImproveReadingData(levels: string): Promise<ImproveReading[]> {
+  async getImproveReadingData( levels: { writing: number; reading: number; grammer: number } ): Promise<ImproveReading[]> {
     try {
       const response = await axios.post(
         'https://maeen-production.up.railway.app/story',
@@ -18,9 +18,9 @@ export class ImporveReadingService {
         { headers: { 'Content-Type': 'application/json' } },
       );
 
-      const improveReadingData = response.data; // Adjust based on actual API response
+      const improveReadingData = response.data; 
 
-      // Save to the database if needed
+    
       const entries = improveReadingData.map(
         (entry: any) => new this.improveReadingModel(entry),
       );

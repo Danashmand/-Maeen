@@ -7,7 +7,7 @@ export class ImporveReadingController {
   constructor(private readonly imporveReadingService: ImporveReadingService) {}
 
   @Get('data')
-  async getImproveReading(@Query('levels') levels: string): Promise<ImproveReading[]> {
+  async getImproveReading(@Query('levels') levels: { writing: number; reading: number; grammer: number } ): Promise<ImproveReading[]> {
     if (!levels) {
       throw new HttpException('Levels parameter is required', HttpStatus.BAD_REQUEST);
     }
