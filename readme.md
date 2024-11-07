@@ -61,3 +61,6 @@ run the python code in the terminal
   "userActivity": 5, 
   "answer" : true} `
 
+### for generating storries (ارو لي قصة)
+- use `/story` to retreive the story 
+**must pass the levels parameter**
