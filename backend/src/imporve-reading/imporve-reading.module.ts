@@ -7,7 +7,7 @@ import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [HttpModule,
-    MongooseModule.forFeature([{ name: ImproveReading.name, schema: ImproveReadingSchema }]),
+    MongooseModule.forFeature([{ name: "ImproveReading", schema: ImproveReadingSchema }]),
   ],
   controllers: [ImporveReadingController],
   providers: [ImproveReadingService],

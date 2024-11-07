@@ -4,37 +4,36 @@ import { Model } from 'mongoose';
 import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs';
 import { ImproveReading } from './improve-reading.schema';
-import {AxiosResponse} from "axios"
+import { AxiosResponse } from 'axios';
+
 @Injectable()
 export class ImproveReadingService {
   constructor(
     @InjectModel(ImproveReading.name) private improveReadingModel: Model<ImproveReading>,
-    private readonly httpService: HttpService, // Use HttpService for HTTP requests
+    private readonly httpService: HttpService,
   ) {}
 
   async getImproveReadingData(levels: { writing: number; reading: number; grammar: number }): Promise<ImproveReading[]> {
     const payload = { levels };
 
-    // Log payload for debugging purposes
-    console.log('Payload being sent to improve reading service:', payload);
-
     try {
-      const response: AxiosResponse<ImproveReading[]> = await lastValueFrom(
-        this.httpService.post<ImproveReading[]>('http://www.maeenmodelserver.site/story', payload, {
+      const response: AxiosResponse<Partial<ImproveReading>[]> = await lastValueFrom(
+        this.httpService.post<Partial<ImproveReading>[]>('http://www.maeenmodelserver.site/story', payload, {
           headers: { 'Content-Type': 'application/json' },
         })
       );
 
-      const improveReadingData = response.data;
+      const improveReadingData = response.data.map(data => ({
+          ...data,
+          levels, 
+      })) as unknown as ImproveReading[];
 
-      // Insert data received from the API into MongoDB
-      await this.improveReadingModel.insertMany(improveReadingData);
+      // Insert data into MongoDB
+      const insertedData = await this.improveReadingModel.insertMany(improveReadingData);
 
-      // Return the inserted data
-      return improveReadingData;
+      return insertedData;
 
     } catch (error) {
-      // Detailed logging for better debugging
       if (error.response) {
         console.error('Error response from improve reading service:', error.response.data);
         console.error('Status code:', error.response.status);
