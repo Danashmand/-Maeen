@@ -111,34 +111,34 @@ export class VirtualTeacherService {
     const payload = {
       question: prompt,
       levels: {
-        writing: user.levels.writing || 0,
-        reading: user.levels.reading || 0,
-        grammer: user.levels.grammar || 0,
+        writing: user.levels?.writing ?? 1,
+        reading: user.levels?.reading ?? 1,
+        grammar: user.levels?.grammar ?? 1,
       },
     };
-
+  
     const endpoint = serviceType === 'spelling-correction' 
       ? 'http://www.maeenmodelserver.site/spelling-correction' 
       : 'http://www.maeenmodelserver.site/ask';
-
+  
     try {
       const response: AxiosResponse<ChatbotResponse> = await lastValueFrom(
         this.httpService.post<ChatbotResponse>(endpoint, payload, {
           headers: { 'Content-Type': 'application/json' },
         })
       );
-
+  
       if (!response.data || !response.data.AI) {
         throw new Error('No response from AI');
       }
-
+  
       return response.data.AI;
     } catch (error) {
       console.error('Error communicating with the Flask server', error);
       throw new Error('Failed to get response from the Flask server');
     }
   }
-
+  
   async findAll() {
     const allChats = await this.virtualTeacherModel.find();
     return allChats;
