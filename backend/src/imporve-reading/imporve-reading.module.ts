@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { ImporveReadingService } from './imporve-reading.service';
+import { ImproveReadingService } from './imporve-reading.service';
 import { ImporveReadingController } from './imporve-reading.controller';
 import { ImproveReading, ImproveReadingSchema } from './improve-reading.schema';
 
@@ -9,6 +9,6 @@ import { ImproveReading, ImproveReadingSchema } from './improve-reading.schema';
     MongooseModule.forFeature([{ name: ImproveReading.name, schema: ImproveReadingSchema }]),
   ],
   controllers: [ImporveReadingController],
-  providers: [ImporveReadingService],
+  providers: [ImproveReadingService],
 })
 export class ImporveReadingModule {}
