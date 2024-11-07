@@ -13,22 +13,29 @@ export class ImproveReadingService {
     private readonly httpService: HttpService,
   ) {}
 
-  async getImproveReadingData(levels: { writing: number; reading: number; grammar: number }): Promise<ImproveReading[]> {
+  async getImproveReadingData(levels: { writing: number; reading: number; grammar: number }) {
     try {
       if (!levels || !levels.writing || !levels.reading || !levels.grammar) {
         throw new Error('Missing required level fields');
       }
   
-      const response: AxiosResponse<ImproveReading[]> = await lastValueFrom(
-        this.httpService.post<ImproveReading[]>(
+      // Make the HTTP request
+      const response: AxiosResponse<{ AI: string }> = await lastValueFrom(
+        this.httpService.post<{ AI: string }>(
           'http://www.maeenmodelserver.site/story',
           { levels },
           { headers: { 'Content-Type': 'application/json' } }
         ),
       );
   
-      // Insert data into MongoDB and return it
-      return this.improveReadingModel.insertMany(response.data);
+      // Insert data into MongoDB
+      const insertedData = await this.improveReadingModel.insertMany(response.data);
+
+      // Return the AI content along with the inserted data
+      return {
+        insertedData,
+        storyContent: response.data.AI, // Return the 'AI' content from the response
+      };
     } catch (error) {
       // Log error details for debugging
       console.error('Error occurred:', error.response || error.request || error.message);
@@ -39,5 +46,4 @@ export class ImproveReadingService {
       );
     }
   }
-  
 }
