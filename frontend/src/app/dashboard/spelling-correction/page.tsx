@@ -15,7 +15,7 @@ const [chat, setChat] = useState<{
 const [loading, setLoading] = useState(false);
 const [userInput, setUserInput] = useState("");
 const messagesEndRef = useRef<null | HTMLDivElement>(null);
-const [userData, setUserData] = useState<{ _id: string; name: string; email: string, score: number ,levels:{writing:number,reading:number,grammer:number} } | null>(null);
+const [userData, setUserData] = useState<{ _id: string; name: string; email: string, score: number ,levels:{writing:number,reading:number,grammar:number} } | null>(null);
 
 const router = useRouter();
 const [colorClass, setColorClass] = useState("text-secondary");

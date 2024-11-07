@@ -22,7 +22,7 @@ def get_credentials():
 # Get project_id and space_id from environment variables
 project_id = "da2e1438-1e80-4b85-9c22-7565678d1498"
 space_id = os.getenv("SPACE_ID")
-# topics: writing, reading, grammer
+# topics: writing, reading, grammar
 # Initialize Watson API client
 wml_credentials = get_credentials()
 client = APIClient(wml_credentials=wml_credentials)
@@ -190,7 +190,7 @@ def build_chat_prompt(task, question, levels, context):
     if not base_prompt:
         raise ValueError(f"Task '{task}' not recognized.")
     if task == "chat":
-        lvl = stringify(levels["grammer"])
+        lvl = stringify(levels["grammar"])
     elif task == "spelling_check":
         lvl = stringify(levels["writing"])
 

@@ -8,7 +8,7 @@ export class SpellingCorrectionController {
 
   @Post('correct')
   async correctText(
-    @Body() body: { text: string; levels: { writing: number; reading: number; grammer: number } }
+    @Body() body: { text: string; levels: { writing: number; reading: number; grammar: number } }
   ) {
     const correctedText = await this.spellingCorrectionService.correctSpelling(body.text, body.levels);
     return { correctedText };

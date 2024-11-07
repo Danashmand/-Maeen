@@ -8,7 +8,7 @@ export class ImproveReadingController {
 
   @Post('data')
   async getImproveReading(@Body('levels') levels: { writing: number; reading: number; grammar: number }) {
-    if (!levels || !levels.writing || !levels.reading || !levels.grammar) {
+    if (!levels ) {
       throw new HttpException('Levels parameter is required with all fields', HttpStatus.BAD_REQUEST);
     }
 

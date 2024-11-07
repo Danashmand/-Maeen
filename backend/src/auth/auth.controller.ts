@@ -16,7 +16,7 @@ export class AuthController {
     return this.authService.signUp(email, password, name, {
       writing: 0,  // Default value for writing
       reading: 0,  // Default value for reading
-      grammer: 0   // Default value for grammer
+      grammar: 0   // Default value for grammar
     });
   }
 

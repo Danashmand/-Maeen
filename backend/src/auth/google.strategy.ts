@@ -35,7 +35,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
         email: emails[0].value,
         name: name.givenName,
         password: '123456789',  // No password for Google users
-        levels: { writing: 0, reading: 0, grammer: 0 },  // Default levels for new users
+        levels: { writing: 0, reading: 0, grammar: 0 },  // Default levels for new users
       });
     }
 

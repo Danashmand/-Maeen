@@ -18,8 +18,8 @@ run the python code in the terminal
 - you can change the number of turns stored by `MAX_HISTORY_TURNS` variable 
 
 # variables discription when using the API: 
-- `levels` : dict of the format: `{"writing": 1-100, "reading": 1-100, "grammer": 1-100}`
-- `topic` one of three: "writing", "reading", "grammer" i.e.( "الإملاء", "القراءة", "القواعد")
+- `levels` : dict of the format: `{"writing": 1-100, "reading": 1-100, "grammar": 1-100}`
+- `topic` one of three: "writing", "reading", "grammar" i.e.( "الإملاء", "القراءة", "القواعد")
 - `question` the user question that is going to the prompt
 - `answer` wheather the previous answer was correct or not
 - `userActivity` number from 1-inf corresponding to how long the user is active 
@@ -34,12 +34,12 @@ run the python code in the terminal
 
 ### virtaul assistant (المساعد الافتراضي)
 - use `/ask` POST using the following format
-`{"question": "علمني عن الالف المقصورة", levels: {"writing": 33.0, "reading": 11.4, "grammer": 80.0}}` 
+`{"question": "علمني عن الالف المقصورة", levels: {"writing": 33.0, "reading": 11.4, "grammar": 80.0}}` 
 
 **must pass `question` and `levels`**
 ### enhace my writing (المصحح الاملائي)
 - use `/spelling-correction` POST using the following format
-`{"question": "اسمي هو حمزت", levels: {"writing": 33.0, "reading": 11.4, "grammer": 80.0}}`
+`{"question": "اسمي هو حمزت", levels: {"writing": 33.0, "reading": 11.4, "grammar": 80.0}}`
 
      **must pass `question` and `levels`**
 
@@ -50,13 +50,13 @@ run the python code in the terminal
 ### exams generation (اختبارات علام)
 
 - use `/start-Exam` to start the exam 
-`{"levels": {"writing": 1, "reading", 10, "grammer": 19}, "topic": "grammer"}`
+`{"levels": {"writing": 1, "reading", 10, "grammar": 19}, "topic": "grammar"}`
 
 **must pass `levels` and `topic`**
 - you can send a POST request with `/nextQuestion` to get the next question in the exam(you should give level, topic, and flag for answer)
 
 **must pass these variables**
-`{"levels" : {"writing":90.795,"reading":54,"grammer":50},"topic": "reading",
+`{"levels" : {"writing":90.795,"reading":54,"grammar":50},"topic": "reading",
   "newTopic":"reading","time": 4,
   "userActivity": 5, 
   "answer" : true} `
@@ -64,4 +64,4 @@ run the python code in the terminal
 ### for generating storries (ارو لي قصة)
 - use `/story` to retreive the story 
 **must pass the levels parameter**
-  `"levels" : {"writing": 90.795, "reading": 54, "grammer": 50},`
+  `"levels" : {"writing": 90.795, "reading": 54, "grammar": 50},`

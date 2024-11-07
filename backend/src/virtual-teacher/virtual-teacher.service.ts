@@ -75,7 +75,7 @@ export class VirtualTeacherService {
     }
   }
 
-  private async updateUserScore(userId: string, skill: 'writing' | 'reading' | 'grammer' = 'writing') {
+  private async updateUserScore(userId: string, skill: 'writing' | 'reading' | 'grammar' = 'writing') {
     const user = await this.userModel.findById(userId);
     if (user) {
       user.levels[skill] = (user.levels[skill] || 0) + 10;
@@ -113,7 +113,7 @@ export class VirtualTeacherService {
       levels: {
         writing: user.levels.writing || 0,
         reading: user.levels.reading || 0,
-        grammer: user.levels.grammer || 0,
+        grammar: user.levels.grammar || 0,
       },
     };
 

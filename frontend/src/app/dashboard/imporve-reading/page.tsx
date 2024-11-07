@@ -7,13 +7,17 @@ import RightSidebar from "@/app/_components/rightSidebar";
 import { useRouter } from "next/navigation";
 import LogoColored from "../../public/logocolored.svg";
 import Face from "../../public/face.svg";
-
+interface levels{
+  writing:number,
+  reading:number,
+  grammar:number
+}
 function Page() {
   const [chat, setChat] = useState<{ createdAt: string; prompt: string; answer: string }[]>([]);
   const [loading, setLoading] = useState(false);
   const [userInput, setUserInput] = useState("");
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
-  const [userData, setUserData] = useState<{ _id: string; name: string; email: string; score: number } | null>(null);
+  const [userData, setUserData] = useState<{ _id: string; name: string; email: string; score: number, levels:levels } | null>(null);
   const router = useRouter();
   const [colorClass, setColorClass] = useState("text-secondary");
   const [displayedScore, setDisplayedScore] = useState(userData ? userData.score : 0);
@@ -21,6 +25,7 @@ function Page() {
   useEffect(() => {
     const fetchUserData = async () => {
       const user = localStorage.getItem("user");
+      
       if (!user) {
         router.push("/auth/signin");
       } else {
@@ -51,9 +56,16 @@ function Page() {
     setLoading(true);
 
     try {
-      const levels = JSON.stringify({ writing: 5, reading: 4, grammar: 3 });
+      const levels = { writing: userData?.levels.writing, reading: userData?.levels.reading, grammar: 3 }; // Adjusted to use an object directly
+      console.log(levels)
       const response = await fetch(
-        `https://maeen-production.up.railway.app/imporve-reading/data?levels=${levels}`
+        `https://maeen-production.up.railway.app/improve-reading/data`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ levels }), // Adjusted to pass the levels directly in the body
+        }
       );
 
       if (!response.ok) {
@@ -61,7 +73,8 @@ function Page() {
       }
 
       const data = await response.json();
-      const teacherResponse = { prompt: userInput, answer: formatResponse(data.text) };
+
+      const teacherResponse = { prompt: userInput, answer: formatResponse(data.storyContent) };
 
       setChat((prev) => {
         const updatedChat = [...prev];
