@@ -10,7 +10,7 @@ export class ImproveReading extends Document {
       reading: { type: Number, required: true },
       grammar: { type: Number, required: true },
     },
-    required: true,
+    required: false,
   })
   levels: {
     writing: number;

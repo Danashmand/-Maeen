@@ -15,14 +15,18 @@ export class ImproveReadingService {
 
   async getImproveReadingData(levels: { writing: number; reading: number; grammar: number }): Promise<ImproveReading[]> {
     try {
+      if (!levels || !levels.writing || !levels.reading || !levels.grammar) {
+        throw new Error('Missing required level fields');
+      }
+  
       const response: AxiosResponse<ImproveReading[]> = await lastValueFrom(
         this.httpService.post<ImproveReading[]>(
           'http://www.maeenmodelserver.site/story',
-           {levels} ,
-          { headers: { 'Content-Type': 'application/json' } },
+          { levels },
+          { headers: { 'Content-Type': 'application/json' } }
         ),
       );
-
+  
       // Insert data into MongoDB and return it
       return this.improveReadingModel.insertMany(response.data);
     } catch (error) {
@@ -35,4 +39,5 @@ export class ImproveReadingService {
       );
     }
   }
+  
 }
