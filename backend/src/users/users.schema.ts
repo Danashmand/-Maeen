@@ -5,13 +5,13 @@ export type UserDocument = User & Document;
 
 @Schema()
 class Levels {
-  @Prop({ default: 0 })
+  @Prop({ default: 1 })
   writing: number;
 
-  @Prop({ default: 0 })
+  @Prop({ default: 1 })
   reading: number;
 
-  @Prop({ default: 0 })
+  @Prop({ default: 1 })
   grammar: number;
 }
 

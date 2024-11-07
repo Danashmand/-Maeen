@@ -7,17 +7,19 @@ import RightSidebar from "@/app/_components/rightSidebar";
 import { useRouter } from "next/navigation";
 import LogoColored from "../../public/logocolored.svg";
 import Face from "../../public/face.svg";
-interface levels{
-  writing:number,
-  reading:number,
-  grammar:number
+
+interface Levels {
+  writing: number;
+  reading: number;
+  grammar: number;
 }
+
 function Page() {
   const [chat, setChat] = useState<{ createdAt: string; prompt: string; answer: string }[]>([]);
   const [loading, setLoading] = useState(false);
   const [userInput, setUserInput] = useState("");
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
-  const [userData, setUserData] = useState<{ _id: string; name: string; email: string; score: number, levels:levels } | null>(null);
+  const [userData, setUserData] = useState<{ _id: string; name: string; email: string; score: number; levels: Levels } | null>(null);
   const router = useRouter();
   const [colorClass, setColorClass] = useState("text-secondary");
   const [displayedScore, setDisplayedScore] = useState(userData ? userData.score : 0);
@@ -25,24 +27,33 @@ function Page() {
   useEffect(() => {
     const fetchUserData = async () => {
       const user = localStorage.getItem("user");
-      
+
       if (!user) {
         router.push("/auth/signin");
       } else {
         const parsedUser = JSON.parse(user).userData;
+
+        // Ensure each level is at least 1
+        parsedUser.levels = {
+          writing: parsedUser.levels.writing || 1,
+          reading: parsedUser.levels.reading || 1,
+          grammar: parsedUser.levels.grammar || 1,
+        };
+
         setUserData(parsedUser);
       }
     };
 
     fetchUserData();
   }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-  
+
     const userPrompt = { createdAt: new Date().toISOString(), prompt: userInput, answer: "" };
     setChat((prev) => [...prev, userPrompt]);
     setUserInput("");
-  
+
     if (userData) {
       const newScore = userData.score + 10;
       setUserData({ ...userData, score: newScore });
@@ -51,32 +62,30 @@ function Page() {
       setTimeout(() => setColorClass("text-secondary"), 2000);
       incrementScore(userData.score, newScore, 1000);
     }
-  
+
     setLoading(true);
-  
+
     try {
-const realLevels ={ writing: 3, reading: 4, grammar:  userData?.levels.grammar};
-console.log( userData?.levels);
-      console.log(realLevels);
-  
+      const realLevels = { writing: userData?.levels.writing, reading: userData?.levels.reading, grammar: userData?.levels.grammar };
+      
       const response = await fetch(
         `https://maeen-production.up.railway.app/improve-reading/data`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ levels: realLevels }), 
+          body: JSON.stringify({ levels: realLevels }),
         }
       );
-  
+
       if (!response.ok) {
         throw new Error("Failed to fetch teacher response");
       }
-  
+
       const data = await response.json();
-  
+
       const teacherResponse = { prompt: userInput, answer: formatResponse(data.storyContent) };
-  
+
       setChat((prev) => {
         const updatedChat = [...prev];
         updatedChat[updatedChat.length - 1].answer = teacherResponse.answer;
@@ -89,7 +98,6 @@ console.log( userData?.levels);
       scrollToBottom();
     }
   };
-  
 
   const incrementScore = (start: number, end: number, duration: number) => {
     const totalSteps = 10;
