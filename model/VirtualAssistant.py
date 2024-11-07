@@ -22,7 +22,7 @@ def get_credentials():
 # Get project_id and space_id from environment variables
 project_id = "da2e1438-1e80-4b85-9c22-7565678d1498"
 space_id = os.getenv("SPACE_ID")
-# topics: writing, reading, grammar
+# topics: writing, reading, grammer
 # Initialize Watson API client
 wml_credentials = get_credentials()
 client = APIClient(wml_credentials=wml_credentials)
@@ -37,7 +37,7 @@ model_id = "sdaia/allam-1-13b-instruct"
 parameters = {
     "decoding_method": "greedy",
     "min_new_tokens": 10,
-    "max_new_tokens": 100,
+    "max_new_tokens": 250,
     "repetition_penalty": 1,
     "temperature": 2,
     "top_p": 1.0,
@@ -71,6 +71,11 @@ task_config = {
         "collection_name": "chat_collection",
         "vector_index_id": "3c606a27-142c-4b67-8bbd-73501ee27d02",
         "top_k": 3
+    },
+    "story": {
+        "collection_name": "story_collection",
+        "vector_index_id": "7c110277-f075-41e5-93ba-dcee4d43cc67",
+        "top_k": 3
     }
 }
 
@@ -91,8 +96,6 @@ No Additional Responses: Do not respond to any non-spell-checking questions. If 
 "أهلا، ماهي الجملة التي تريد مني تصحيحها😉🔎"
 Then, wait for the child to provide a new sentence for spelling review.
 
-Clarification: If any part of these instructions is unclear, ask a specific question. If everything is understood, type only "فهمت" on the screen without any additional text.
-
 Focus on Spell-Checking Only: Do not engage in discussions or respond to any other topic under any circumstances.
 
 Reminder: After providing your spell-checking feedback, end your response there without further commentary.
@@ -100,10 +103,8 @@ Reminder: After providing your spell-checking feedback, end your response there 
 Example Interaction:
 
 Child’s Input: "أريد أن أذهب إلى المدرسه."
-Your Response: "أحسنت! لا توجد أخطاء إملائية في جملتك." (if correct)
-OR
 "الكلمة الصحيحة هي 'المدرسة'. يجب أن تحتوي على تاء مربوطة في النهاية. تذكر دائماً استخدام التاء المربوطة في الكلمات التي تعني مكاناً، مثل مدرسة."
-Note: Keep your responses precise and focused only on spelling, ensuring the child receives clear, accurate feedback.''',
+* Note: Keep your responses precise and focused only on spelling, ensuring the child receives clear, accurate feedback.''',
     
     "question_generation": "You are an AI model that generates a multiple-choice question for children learning Arabic.",
     
@@ -164,7 +165,7 @@ def hydrate_chromadb(task):
     print(f"Hydration complete for '{task}' collection.")
     return collection
 
-# Function to perform proximity search
+# Function to perform proximity search (use immediatlly without getting the collectoin from hydrate_chromadb)
 def proximity_search(question, task):
     config = task_config.get(task)
     if not config:
@@ -190,7 +191,7 @@ def build_chat_prompt(task, question, levels, context):
     if not base_prompt:
         raise ValueError(f"Task '{task}' not recognized.")
     if task == "chat":
-        lvl = stringify(levels["grammar"])
+        lvl = stringify(levels["grammer"])
     elif task == "spelling_check":
         lvl = stringify(levels["writing"])
 
@@ -200,8 +201,9 @@ def build_chat_prompt(task, question, levels, context):
 # Chat function
 def chat(question, levels, task, MAX_HISTORY_TURNS=4):
     
-    print("chat function")
+    # print("chat function")
     conversation_history = session.get("conversation_history", [])
+    #############################################################################
     proximity_context = proximity_search(question, task)
     prompt = build_chat_prompt(task, question, levels, proximity_context)
     print(prompt)
@@ -215,8 +217,10 @@ def chat(question, levels, task, MAX_HISTORY_TURNS=4):
     session["conversation_history"] = conversation_history
     return generated_response
 
+
+# function to learn the level of the user through the exam answers
 def updateLevel(answer, time, level, activity):
-    # Sensitivity decay parameters
+    # Sensitivity decay parameters for learning 
     initial_sensitivity = 20  
     minimum_sensitivity = 0.5 
     decay_factor = 0.75 
@@ -224,8 +228,6 @@ def updateLevel(answer, time, level, activity):
     sensitivity = max(minimum_sensitivity, initial_sensitivity * (decay_factor ** activity))
     # 20 at first
     # 15 at second, 11 at third,...
-    
-    
     if answer:
         # Faster correct answers give higher score
         score = (20 - time) / 10 if time < 20 else 0.5 #from 2 - 0.5
@@ -238,6 +240,7 @@ def updateLevel(answer, time, level, activity):
     level = min(max(level, 1), 100)
     return level
 
+# Function to generate a question based on exam topic and user level
 def getQuestion(levels,topic): 
     lvl = stringify(levels[topic])
         
@@ -259,6 +262,8 @@ def getQuestion(levels,topic):
     prompt = f'''
     [INST] {role_instruction} [/INST]
     '''
+    #############################################################################
+
     proximity_context = proximity_search(topic, "question_generation")
     prompt += f"Context: {proximity_context}\n"
     prompt += f"Level: {lvl}\n"
@@ -266,7 +271,7 @@ def getQuestion(levels,topic):
     generated_response = model.generate_text(prompt=prompt)
     return generated_response
 
-# Function to stringify user level
+# Function to stringify user level to fed it into the model
 def stringify(level):
     if level < 0:
         raise ValueError("Level cannot be negative")
@@ -277,26 +282,56 @@ def stringify(level):
     elif level < 60:
         return "intermediate"
     elif level < 80:
-        return "intermediate to expert"
+        return "intermediate to advanced"
     else:
-        return "expert"
+        return "advanced"
 
 def getStory(level):
-    lvl = stringify(level)
-    prompt = '''you are an arabic story teller that writes short stories for children in ARABIC language. the child is {lvl} at reading in arabic language.
-    write exicting stories that are easy to understand and fun to read. use simple words and make sure the stories are not long.
-    الطفل: اعطني قصة 
-    حاكي القصص: في ليلة جميلة وهادئة، كان القمر يلعب مع النجوم في السماء. رأى طفلًا ينظر إليه من النافذة، فابتسم القمر للطفل. شعر الطفل بالسعادة وضحك، وضحك القمر أيضًا. ومنذ ذلك الحين، كلما شعر الطفل بالحزن، كان ينظر إلى القمر، فيبتسم له ويشعر بالفرح مرة أخرى.
-    الطفل: اعطني قصة: 
-    حاكي القصص: كان هناك أرنب صغير يعيش في الغابة. يوماً ما، شعر بالجوع الشديد ولكنه لم يجد الجزر في مكانه المعتاد. فكر الأرنب قليلاً، ثم استخدم أنفه ليشم الهواء ويبحث عن الجزر. وجد الأرنب حقلاً كبيراً مليئاً بالجزر بعد أن تبع رائحته. أكل الأرنب الجزر وشعر بالسعادة والامتنان لذكائه.
-    الطفل: اعطني قصة
-    حاكي القصص: كانت هناك فراشة صغيرة تحب الطيران في الحديقة. في يوم مشمس، رأت فراشة زهرة جميلة وقررت أن تستريح عليها. شكرت الفراشة الزهرة على رحيقها اللذيذ وألوانها الزاهية. قالت الزهرة للفراشة: "تعالي دائماً لتزوريني." ومنذ ذلك اليوم، كانت الفراشة تزور الزهرة كل يوم وتنشر الفرح في الحديقة.
-    الطفل: اعطني قصة
-    حاكي القصص: '''
-    model.params["random_seed"] = random.randint(1, 12451)
+    lvl = stringify(level)   
+     
+    story_themes_english = [
+    "Library", "Colors", "Raindrop", "Bee", "Wind", "Shadow", "Moon", "Toys", 
+    "Sea", "Chair", "Friendship", "Cloud", "Time", "Potion", "Animals", 
+    "Paintbrush", "Giggles", "Playground", "Trees", "Rainbow"]
+    random_theme = random.choice(story_themes_english)
+    print("Iam printing here our random theme: ",random_theme)
+
+  #Learning rate,  
+  
+    prompt = f'''
+[INST]
+You are an Arabic storyteller who writes short, engaging stories with at least 100 words and no longer than
+175 words for children in ARABIC. 
+
+- Theme of the story: {random_theme}.
+- The child’s Arabic reading level: {lvl}. Adapt the story’s language and length accordingly.
+- Keep the story short, simple, and fun to read.
+
+IMPORTANT:
+- Tell ONLY ONE story, and do not continue with any additional stories.
+- Use clear and simple words appropriate for the child’s reading level.
+- End the story with the word "النهاية" and nothing further.
+
+Example Dialogue:
+الطفل: اعطني قصة
+حاكي القصص: في ليلة جميلة وهادئة، كان القمر يلعب مع النجوم في السماء. رأى طفلًا ينظر إليه من النافذة، فابتسم القمر للطفل. شعر الطفل بالسعادة وضحك، وضحك القمر أيضًا. ومنذ ذلك الحين، كلما شعر الطفل بالحزن، كان ينظر إلى القمر، فيبتسم له ويشعر بالفرح مرة أخرى.
+النهاية
+
+Execution Instructions:
+- Think step by step.
+- Focus on creating one complete story and then stop.
+- If you do it correctly, you’ll earn 20 dollars.
+
+[/INST]
+'''
+
+
+
+    #############################################################################
+    grounding = proximity_search(lvl, "story")
+   # prompt = "_GROUNDING_:\n" + grounding + prompt 
     respons = model.generate_text(prompt=prompt)
     return respons
-    
 #############################################################################
 #############################################################################
 #######################  <flask routes below> ###############################
@@ -380,4 +415,3 @@ def sendStory():
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
-
