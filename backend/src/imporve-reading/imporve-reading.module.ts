@@ -3,9 +3,10 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ImproveReadingService } from './imporve-reading.service';
 import { ImporveReadingController } from './imporve-reading.controller';
 import { ImproveReading, ImproveReadingSchema } from './improve-reading.schema';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
-  imports: [
+  imports: [HttpModule,
     MongooseModule.forFeature([{ name: ImproveReading.name, schema: ImproveReadingSchema }]),
   ],
   controllers: [ImporveReadingController],
