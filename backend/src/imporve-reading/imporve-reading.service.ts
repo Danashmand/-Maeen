@@ -29,7 +29,7 @@ export class ImporveReadingService {
       return entries;
     } catch (error) {
       throw new HttpException(
-        'Failed to fetch improve reading data from external API',
+        'Failed to fetch improve reading data from external API ' +levels,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
