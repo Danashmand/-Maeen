@@ -12,10 +12,6 @@ export class ImporveReadingController {
       throw new HttpException('Levels parameter is required', HttpStatus.BAD_REQUEST);
     }
 
-    return this.imporveReadingService.getImproveReadingData({
-      writing: levels.writing, 
-      reading: levels.reading, 
-      grammar: levels.grammar // Ensure spelling is consistent
-    });
+    return this.imporveReadingService.getImproveReadingData(levels);
   }
 }
