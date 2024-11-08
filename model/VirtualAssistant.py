@@ -36,13 +36,14 @@ model_id = "sdaia/allam-1-13b-instruct"
 
 parameters = {
     "decoding_method": "greedy",
-    "min_new_tokens": 10,
-    "max_new_tokens": 250,
-    "repetition_penalty": 1,
-    "temperature": 2,
-    "top_p": 1.0,
-    "top_k": 90,
-    "random_seed": random.randint(1, 12451)
+    # "min_new_tokens": 10,
+    # "max_new_tokens": 250,
+    # "repetition_penalty": 1,
+    # "temperature": .7,
+    # "top_p": 1.0,
+    # "top_k": 90,
+    # "random_seed": random.randint(1, 12451),
+    "stoping_sequence": ["END"]
 }
 
 model = Model(
@@ -64,44 +65,57 @@ task_config = {
     },
     "question_generation": {
         "collection_name": "question_generation_collection",
-        "vector_index_id": "3c606a27-142c-4b67-8bbd-73501ee27d02",
+        "vector_index_id": "e097139e-82da-49d3-98ee-0dc217e05721", 
         "top_k": 10
     },
     "chat": {
         "collection_name": "chat_collection",
-        "vector_index_id": "3c606a27-142c-4b67-8bbd-73501ee27d02",
+        "vector_index_id": "e097139e-82da-49d3-98ee-0dc217e05721", #chat set
         "top_k": 3
     },
     "story": {
         "collection_name": "story_collection",
-        "vector_index_id": "7c110277-f075-41e5-93ba-dcee4d43cc67",
+        "vector_index_id": "7c110277-f075-41e5-93ba-dcee4d43cc67", #stories set
         "top_k": 3
     }
 }
 
 base_prompts = {
-    "spelling_check": 
-        '''
-[INST] 
-You are a dedicated spell checker, assisting a young Arabic learner with fixing spelling corrections only. 
-Use a formal tone that is child-friendly.
-Follow these rules strictly to ensure consistency:
-Instructions
-Primary Task: Your ONLY AND ONLY responsibility is to review the text provided by the child for spelling errors 
-,correct them if present and clearly explain the reason behind the mistake.. 
-Praise for Error-Free Sentences: If the child’s sentence contains no spelling mistakes, praise their effort.
-Error Correction with Explanation:
-No Additional Responses: Do not respond to any non-spell-checking questions. 
-If the user asks an unrelated question, reply with:
-"أهلا، ماهي الجملة التي تريد مني تصحيحها😉🔎"
-Then, wait for the child to provide a new sentence for spelling review.
-Reminder: After providing your spell-checking feedback, end your response there without further commentary.
-Example Interaction:
-Child’s Input: "أريد أن أذهب إلى المدرسه."
-Your Response: "أحسنت! لا توجد أخطاء إملائية في جملتك." (if correct)
-OR
-"الكلمة الصحيحة هي 'المدرسة'. يجب أن تحتوي على تاء مربوطة في النهاية. تذكر دائماً استخدام التاء المربوطة في الكلمات التي تعني مكاناً، مثل مدرسة."
-    [/INST]
+    "spelling_check":'''
+            [INST]
+            أنت مدقق إملائي باللغة العربية لمتعلمين صغار. مهمتك هي مراجعة كل كلمة في النص الذي يقدمه الطفل للتحقق من الأخطاء الإملائية. اتبع الخطوات التالية:
+            مراجعة كل كلمة: قم بفحص كل المكتوب.
+            إذا كانت الجملة بها خطأ  إملائي، اكتب الكلمة متبوعةً بسبب تصحيحها.
+            التركيز: استجب فقط بتقديم الملاحظات الإملائية كما هو مطلوب، وتجنب أي استجابات إضافية أو استبدال الكلمات بكلمات أخرى.
+            مثال:
+            المدخل: "الطعامو لذيذ"
+            الإخراج: الطعامو - نعم
+            لذيذ - لا
+            الأسلوب: استخدم أسلوباً رسمياً مناسباً ومشجعاً للطفل.
+           [/INST]''', 
+    
+    
+    "question_generation": """ You are an AI that generates an MCQ question with three choices your question should be about the foundation of Arabic language and the correct answer should be the first choice
+    you should generate text, or sentences to apply these foundations in the question and should end your choices with "END"
+    
+    في هذه الجملة **يلعب الطفل في الحديقة** الفعل هو:
+    - يلعب (alwayes first choice is correct)
+    - الطفل
+    - الحديقة
+    END
+    
+    في هذه الجملة **فزع الطفل عند رؤية الوحش** معنى فزع هو: 
+    - خاف
+    - ضحك
+    - نام
+    END
+    """,
+    
+    
+    
+    "chat": '''You are a friendly AI that answers questions in Arabic with Islamic values to the conversation.
+    Make sure to make your answers short, concise, and simple also give examples
+    Only respond to questions that are related to the topic and ignore the rest
     '''
 }
 
@@ -160,6 +174,8 @@ def hydrate_chromadb(task):
 
 # Function to perform proximity search (use immediatlly without getting the collectoin from hydrate_chromadb)
 def proximity_search(question, task):
+    if task == "spelling_check":
+        return ""
     config = task_config.get(task)
     if not config:
         raise ValueError(f"Task '{task}' is not configured.")
@@ -191,8 +207,6 @@ def build_chat_prompt(task, question, levels, context, conversation_history):
     prompt_input = context + f"""<<SYS>>{base_prompt}<</SYS>>\n\n""" 
     for turn in conversation_history:
         prompt_input += f'''{turn["question"]} [/INST] {turn["response"]}  </s><s>[INST]'''
-    
-    
     formattedQuestion = f"<s> [INST] {question} [/INST]"
     prompt = f"{prompt_input} {formattedQuestion}"
     return prompt
@@ -242,7 +256,6 @@ def updateLevel(answer, time, level, activity):
 # Function to generate a question based on exam topic and user level
 def getQuestion(levels,topic): 
     lvl = stringify(levels[topic])
-        
     role_instruction = '''You are an AI model that generate a quesiton for kids about foundation of arabic language to examine thier level of understanding
     - the questions should be in arabic and easy to understand
     - all the questions should be MCQ questions with four choices each 
@@ -257,9 +270,9 @@ def getQuestion(levels,topic):
     Example of expert level question:
     {"question" : "كيف تكتب كلمة الهمزة في كلمة أزهار؟","answers" : ["على الألف","على السطر","على الياء","على الواو"]}
     '''
-    
+    inst = base_prompts["question_generation"]
     prompt = f'''
-    [INST] {role_instruction} [/INST]
+    [INST] {inst} [/INST]
     '''
     #############################################################################
 
@@ -294,10 +307,9 @@ def getStory(level):
     "Paintbrush", "Giggles", "Playground", "Trees", "Rainbow"]
     random_theme = random.choice(story_themes_english)
     print("Iam printing here our random theme: ",random_theme)
-
-  #Learning rate,  
   
     prompt = f'''
+    
 [INST]
 You are an Arabic storyteller who writes short, engaging stories with at least 100 words and no longer than
 175 words for children in ARABIC. 
@@ -309,12 +321,12 @@ You are an Arabic storyteller who writes short, engaging stories with at least 1
 IMPORTANT:
 - Tell ONLY ONE story, and do not continue with any additional stories.
 - Use clear and simple words appropriate for the child’s reading level.
-- End the story with the word "النهاية" and nothing further.
+- End the story with the word "END" and nothing further.
 
 Example Dialogue:
 الطفل: اعطني قصة
 حاكي القصص: في ليلة جميلة وهادئة، كان القمر يلعب مع النجوم في السماء. رأى طفلًا ينظر إليه من النافذة، فابتسم القمر للطفل. شعر الطفل بالسعادة وضحك، وضحك القمر أيضًا. ومنذ ذلك الحين، كلما شعر الطفل بالحزن، كان ينظر إلى القمر، فيبتسم له ويشعر بالفرح مرة أخرى.
-النهاية
+END
 
 Execution Instructions:
 - Think step by step.
