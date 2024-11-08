@@ -10,7 +10,7 @@ function Page() {
   const [error, setError] = useState<string | null>(null);
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(event.target.value);
-    setError(null); // Reset error on input change
+    setError(null); 
   };
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -32,8 +32,8 @@ function Page() {
       // Store the user data in localStorage with consistent structure
       localStorage.setItem("user", JSON.stringify({ userData: response.data }));
   
-      // Redirect to the dashboard
-      router.push("/first-exam");  // Uses Next.js navigation
+      
+      router.push("/first-exam");  
     } catch (error) {
       console.error("Error fetching user:", error);
     }
@@ -50,7 +50,7 @@ function Page() {
       className="-z-10 object-cover  "
     />
         <div className="flex items-center justify-center min-h-screen ">
-        <div className="bg-white/10 p-16 rounded-[10%] shadow-lg w-[470px] h-[470px] mr-1 ">
+        <div className="bg-white/10 p-10 py-16 rounded-[15%] shadow-lg w-[390px] mr-1">
         <h2 className="text-2xl font-bold mb-6 text-right" > ✋ مرحبًا بك     </h2>
 
         <h2 className="text-5xl font-bold mb-6 text-right">  خطوة أخيرة</h2>
