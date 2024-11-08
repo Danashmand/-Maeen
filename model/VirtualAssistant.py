@@ -37,8 +37,8 @@ model_id = "sdaia/allam-1-13b-instruct"
 parameters = {
     "decoding_method": "greedy",
     # "min_new_tokens": 10,
-    # "max_new_tokens": 250,
-    # "repetition_penalty": 1,
+    "max_new_tokens": 900,
+    "repetition_penalty": 1,
     # "temperature": .7,
     # "top_p": 1.0,
     # "top_k": 90,
@@ -82,17 +82,22 @@ task_config = {
 
 base_prompts = {
     "spelling_check":'''
-            [INST]
-            أنت مدقق إملائي باللغة العربية لمتعلمين صغار. مهمتك هي مراجعة كل كلمة في النص الذي يقدمه الطفل للتحقق من الأخطاء الإملائية. اتبع الخطوات التالية:
-            مراجعة كل كلمة: قم بفحص كل المكتوب.
-            إذا كانت الجملة بها خطأ  إملائي، اكتب الكلمة متبوعةً بسبب تصحيحها.
-            التركيز: استجب فقط بتقديم الملاحظات الإملائية كما هو مطلوب، وتجنب أي استجابات إضافية أو استبدال الكلمات بكلمات أخرى.
-            مثال:
-            المدخل: "الطعامو لذيذ"
-            الإخراج: الطعامو - نعم
-            لذيذ - لا
-            الأسلوب: استخدم أسلوباً رسمياً مناسباً ومشجعاً للطفل.
-           [/INST]''', 
+        أنت مدقق إملائي باللغة العربية لمتعلمين صغار. مهمتك هي مراجعة كل كلمة في النص الذي يقدمه الطفل للتحقق من الأخطاء الإملائية. اتبع الخطوات التالية:
+        
+        مراجعة كل كلمة: قم بفحص كل المكتوب.
+        
+        إذا كانت الجملة بها خطأ  إملائي، اكتب الكلمة متبوعةً بسبب تصحيحها.
+        
+        التركيز: استجب فقط بتقديم الملاحظات الإملائية كما هو مطلوب، وتجنب أي استجابات إضافية أو استبدال الكلمات بكلمات أخرى.
+        
+        مثال:
+        
+        المدخل: "الطعامو لذيذ"
+        
+        الإخراج: الطعامو - نعم
+        لذيذ - لا
+        
+        الأسلوب: استخدم أسلوباً رسمياً مناسباً ومشجعاً للطفل.''', 
     
     
     "question_generation": """ You are an AI that generates an MCQ question with three choices your question should be about the foundation of Arabic language and the correct answer should be the first choice
@@ -220,7 +225,7 @@ def chat(question, levels, task, MAX_HISTORY_TURNS=4):
     proximity_context = proximity_search(question, task)
     prompt = build_chat_prompt(task, question, levels, proximity_context,conversation_history)
     print(prompt)
-    
+    print("="*30)
     generated_response = model.generate_text(prompt=prompt)
     conversation_history.append({"question": question, "response": generated_response})
 
@@ -301,12 +306,12 @@ def stringify(level):
 def getStory(level):
     lvl = stringify(level)   
      
-    story_themes_english = [
-    "Library", "Colors", "Raindrop", "Bee", "Wind", "Shadow", "Moon", "Toys", 
-    "Sea", "Chair", "Friendship", "Cloud", "Time", "Potion", "Animals", 
-    "Paintbrush", "Giggles", "Playground", "Trees", "Rainbow"]
-    random_theme = random.choice(story_themes_english)
-    print("Iam printing here our random theme: ",random_theme)
+    # story_themes_english = [
+    # "Library", "Colors", "Raindrop", "Bee", "Wind", "Shadow", "Moon", "Toys", 
+    # "Sea", "Chair", "Friendship", "Cloud", "Time", "Potion", "Animals", 
+    # "Paintbrush", "Giggles", "Playground", "Trees", "Rainbow"]
+    # random_theme = random.choice(story_themes_english)
+    # print("Iam printing here our random theme: ",random_theme)
   
     prompt = f'''
     
@@ -314,12 +319,12 @@ def getStory(level):
 You are an Arabic storyteller who writes short, engaging stories with at least 100 words and no longer than
 175 words for children in ARABIC. 
 
-- Theme of the story: {random_theme}.
 - The child’s Arabic reading level: {lvl}. Adapt the story’s language and length accordingly.
 - Keep the story short, simple, and fun to read.
 
 IMPORTANT:
 - Tell ONLY ONE story, and do not continue with any additional stories.
+- it should be {level+ 70} words long.
 - Use clear and simple words appropriate for the child’s reading level.
 - End the story with the word "END" and nothing further.
 
@@ -339,8 +344,13 @@ Execution Instructions:
 
 
     #############################################################################
-    grounding = proximity_search(lvl, "story")
+    # grounding = proximity_search(lvl, "story")
    # prompt = "GROUNDING:\n" + grounding + prompt 
+    model.params= {"decoding_method" : "sample",
+                   "temperature" : 0.5,
+                   "top_p" : 1.0,
+                   "top_k" : 90,
+                   "max_new_tokens" : 900}
     respons = model.generate_text(prompt=prompt)
     return respons
 #############################################################################
