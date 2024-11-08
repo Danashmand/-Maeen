@@ -111,9 +111,9 @@ export class VirtualTeacherService {
     const payload = {
       question: prompt,
       levels: {
-        writing: user.levels?.writing ?? 1,
-        reading: user.levels?.reading ?? 1,
-        grammar: user.levels?.grammar ?? 1,
+        writing:  1,
+        reading:  1,
+        grammar:  1,
       },
     };
   
