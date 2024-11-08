@@ -324,7 +324,7 @@ You are an Arabic storyteller who writes short, engaging stories with at least 1
 
 IMPORTANT:
 - Tell ONLY ONE story, and do not continue with any additional stories.
-- it should be {level+ 70} words long.
+- you MUST BE ON {level+ 70} words long.
 - Use clear and simple words appropriate for the child’s reading level.
 - End the story with the word "END" and nothing further.
 
@@ -414,11 +414,22 @@ def sendNextQuestion():
     userActivity = data.get("userActivity", "")
     singlevel = updateLevel(answer, time, singlevel, userActivity)
     levels[topic] = singlevel
-    
     if newTopic:
         response = getQuestion(levels, newTopic)
     else:
         response = "Exam finished"
+    
+    
+    # example question just for testing the fetch (will be deleted)
+    response =  """ما هو الفعل في الجملة  "يلعب الطفل فالحديقة"
+    - يلعب
+    - الطفل
+    - الحديقة
+    END
+    """
+    levels = data.get("levels", "")
+        
+    
     return jsonify({"AI": response,"levels":levels})
 
 # For clearing the conversation history
