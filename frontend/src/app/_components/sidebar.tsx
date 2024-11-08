@@ -16,10 +16,10 @@ const SidebarItem = ({ icon: Icon, label, href, isActive }: { icon: React.FC, la
   <div>
     <a 
       href={href || "#"} 
-      className={`flex ml-4 items-center space-x-2 p-3 rounded-2xl ${isActive ? 'bg-secondary2' : 'hover:bg-secondary2'}`}
+      className={`flex ml-4 gap-y-20 items-center space-x-2 p-3 rounded-2xl ${isActive ? 'bg-secondary2' : 'hover:bg-secondary2'}`}
     > 
       <Image className="w-6 h-6" alt='' src={Icon}/> 
-      <span className='text-xl font-bold'>{label}</span>
+      <span className='text-md font-bold'>{label}</span>
     </a>
   </div>
 );

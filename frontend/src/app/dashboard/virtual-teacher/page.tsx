@@ -216,8 +216,8 @@ const [chat, setChat] = useState<{
       
         .replace(/\bAI\b/g, '').replace(/ AI/g, '').replace(/AI\b/g, '') // Remove AI from the response
     
-        .replace(/(.*?):/g, "<b style='font-weight: 900; font-size: 1.4rem;'>$1</b>:") // Bold the line before the colon
-        .replace(/\*\*(.*?)\*\*/g, "<b style='font-weight: 900; font-size: 1.4rem;'>$1</b>") // Bold text wrapped in **
+        .replace(/(.*?):/g, "<b style='font-weight: 900; font-size: 1rem;'>$1</b>:") // Bold the line before the colon
+        .replace(/\*\*(.*?)\*\*/g, "<b style='font-weight: 900; font-size: 1rem;'>$1</b>") // Bold text wrapped in **
         .replace(/(\d+\.\s+)/g, "<br>$1"); // Add line breaks before numbered lists
 };
 
@@ -236,11 +236,11 @@ const [chat, setChat] = useState<{
       </div>
 
       <div className="flex flex-col space-y-4 overflow-y-auto  bg-white/90 mb-5 mt-10 mr-1  w-[119vh] bg-opacity-10 p-6 rounded-3xl shadow-xl backdrop-blur-md " dir="ltr">
-<div className="flex flex-row  justify-between  text-secondary2 text-4xl  font-extrabold ">
+<div className="flex flex-row  justify-between  text-secondary2 text-3xl  font-extrabold ">
 
   <div className='flex flex-row justify-start ml-3  border-2 rounded-xl text-lg border-white/50'>
         <div className='w-14 flex justify-center bg-white rounded-full border-4 border-secondary mr-4 '> 
-        <Image src={Face} alt="Logo" className="w-20" />
+        <Image src={Face} alt="Logo" className="w-16" />
 
         </div>
         <div className='flex-col flex'>
@@ -248,20 +248,19 @@ const [chat, setChat] = useState<{
           <div className={colorClass}>نقاطك: {displayedScore}</div>
           </div>
       </div>
-  <Image src={LogoColored} alt="logo" className="w-12"/>
-  <div className="flex justify-center text-center mt-2">مدرسك الإفتراضي</div>
+  <Image src={LogoColored} alt="logo" className="w-10"/>
+  <div className="flex justify-center text-center mt-1 ">مدرسك الإفتراضي</div>
   </div> 
-  <hr className="border-2 border-secondary" />
   
   
-   <div className="flex flex-col space-y-4 overflow-y-auto flex-grow bg-white bg-opacity-10 p-6 h-[75vh] backdrop-blur-md transition-transform duration-300 ease-in-out" dir="rtl">
+   <div className="flex flex-col space-y-2 overflow-y-auto flex-grow bg-white bg-opacity-10 p-6 h-[75vh] backdrop-blur-md transition-transform duration-300 ease-in-out" dir="rtl">
   {chat.map((item, index) => (
   <div key={index} className="flex flex-col">
     {/* Render user's prompt */}
     {item.prompt && item.prompt.trim() !== ""&& (
       <div className="flex items-center mb-2">
         <Image src={StudentIcon} alt="Student Icon" className="w-8 h-8 rounded-full ml-2" />
-        <div className="bg-secondary2/90 p-3 rounded-xl text-white animate-fade-in-up text-lg leading-relaxed max-w-[75%]">
+        <div className="border border-secondary2 p-3 rounded-xl text-secondary2 animate-fade-in-up text-md leading-relaxed max-w-[75%]">
           {item.prompt}
         </div>
       </div>
@@ -269,7 +268,7 @@ const [chat, setChat] = useState<{
     {/* Render chatbot's answer */}
     {item.answer && (
       <div className="flex items-center justify-end mt-2">
-        <div className=" p-3 max-w-[75%] rounded-xl text-black animate-fade-in-up text-xl leading-relaxed border-r-2  border-secondary2" dangerouslySetInnerHTML={{ __html: item.answer }} />
+        <div className=" p-3 max-w-[75%] rounded-xl text-black animate-fade-in-up text-lg leading-relaxed border-r-2  border-secondary2" dangerouslySetInnerHTML={{ __html: item.answer }} />
         <Image src={StudentIcon} alt="Teacher Icon" className="w-8 h-8 rounded-full mr-2" />
       </div>
     )}
@@ -282,8 +281,8 @@ const [chat, setChat] = useState<{
   </div>
 
   <form onSubmit={handleSubmit} className="flex items-center space-x-4 pt-6">
-    <input type="text" className="flex-grow p-4 text-right rounded-full border-2  border-primary focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition duration-200 ease-in-out text-gray-900 bg-white text-lg leading-relaxed" placeholder="...اسأل شيئًا" value={userInput} onChange={(e) => setUserInput(e.target.value)} />
-    <button type="submit" className="bg-primary text-white rounded-full px-6 py-4 transition duration-200 ease-in-out hover:bg-secondary">
+    <input type="text" className="flex-grow p-2 text-right rounded-full border-2  border-primary focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition duration-200 ease-in-out text-gray-900 bg-white text-lg leading-relaxed" placeholder="...اسأل شيئًا" value={userInput} onChange={(e) => setUserInput(e.target.value)} />
+    <button type="submit" className="bg-primary text-white rounded-full px-6 py-3 transition duration-200 ease-in-out hover:bg-secondary">
       إرسال
     </button>
   </form>
