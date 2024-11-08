@@ -92,7 +92,7 @@ const OtherSections = () => {
         <h1 className='text-6xl font-bold text-center mb-10'>
 الفريق المؤسس        </h1>
 
-<div className='flex flex-row gap-20 ml-28 mb-20'>
+<div className='flex flex-row gap-20 ml-24 mb-20'>
 <div className="flex flex-col items-center bg-white rounded-3xl shadow-lg p-6 text-center w-60">
       <div className="w-24 h-24 rounded-full overflow-hidden mb-4">
         <Image

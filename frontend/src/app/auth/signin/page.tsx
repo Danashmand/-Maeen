@@ -4,7 +4,7 @@ import Image from 'next/image';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import background from '../../public/images/MacBook Pro 14_ - 1.svg';
-
+import Google from '../../public/images/google.svg';
 const SignIn = () => {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
@@ -68,7 +68,7 @@ const SignIn = () => {
         className="-z-10 object-cover"
       />
       <div className="flex items-center justify-center min-h-screen">
-        <div className="bg-white/10 p-16 rounded-[10%] shadow-lg w-[470px] mr-1">
+        <div className="bg-white/10 p-10  rounded-[15%] shadow-lg w-[390px] mr-1">
           <h2 className="text-2xl font-bold mb-6 text-right">✋ مرحبًا بك</h2>
           <div className="text-right text-5xl font-bold">تسجيل الدخول</div>
           
@@ -112,9 +112,13 @@ const SignIn = () => {
             <p className="text-xl">ـــــــــــــــــــــــــــــــ أو ــــــــــــــــــــــــــــــ</p>
             <button
               onClick={handleGoogleSignIn}
-              className="w-full mt-4 bg-secondary2 text-white py-2 px-4 rounded-md hover:bg-primary transition duration-200"
+              className="w-full flex justify-center gap-1 items-center text-center mt-4 bg-secondary2 text-white py-2 px-4 rounded-md hover:bg-primary transition duration-200"
             >
-              سجل مع قوقل
+              <Image src={Google} alt="google" width={20} height={20} />
+              <div>
+              سجل مع قوقل 
+
+              </div>
             </button>
           </div>
 

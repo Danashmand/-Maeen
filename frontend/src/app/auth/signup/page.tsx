@@ -61,8 +61,8 @@ const SignUp = () => {
     <div className="relative h-screen w-full overflow-hidden text-right">
       <Image src={background} alt="Background Cover" fill className="-z-10 object-cover" />
       <div className="flex items-center justify-center min-h-screen">
-        <div className="bg-white/10 p-16 rounded-[10%] shadow-lg w-[470px] mr-1">
-          <h2 className="text-2xl font-bold mb-6 text-right">✋ مرحبًا بك</h2>
+      <div className="bg-white/10 p-10  rounded-[15%] shadow-lg w-[390px] mr-1">
+      <h2 className="text-2xl font-bold mb-6 text-right">✋ مرحبًا بك</h2>
           <h2 className="text-5xl font-bold mb-6 text-right">إنشاء حساب</h2>
           <form onSubmit={handleSubmit}>
             <div className="mb-4">
