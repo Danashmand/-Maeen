@@ -186,7 +186,7 @@ def proximity_search(question, task):
     return "\n".join(documents)
 
 # Function to build chat prompt
-def build_chat_prompt(task, question, levels, context):
+def build_chat_prompt(task, question, levels, context, conversation_history):
     base_prompt = base_prompts.get(task)
     if not base_prompt:
         raise ValueError(f"Task '{task}' not recognized.")
@@ -194,8 +194,14 @@ def build_chat_prompt(task, question, levels, context):
         lvl = stringify(levels["grammar"])
     elif task == "spelling_check":
         lvl = stringify(levels["writing"])
-
-    prompt = f"{base_prompt}\nUser Level: {lvl}\nContext: {context}\nUser: {question}"
+    
+    prompt_input = context + f"""<<SYS>>{base_prompt}<</SYS>>\n\n""" 
+    for turn in conversation_history:
+        prompt_input += f'''{turn["question"]} [/INST] {turn["response"]}  </s><s>[INST]'''
+    
+    
+    formattedQuestion = f"<s> [INST] {question} [/INST]"
+    prompt = f"{prompt_input} {formattedQuestion}"
     return prompt
 
 # Chat function
@@ -205,7 +211,7 @@ def chat(question, levels, task, MAX_HISTORY_TURNS=4):
     conversation_history = session.get("conversation_history", [])
     #############################################################################
     proximity_context = proximity_search(question, task)
-    prompt = build_chat_prompt(task, question, levels, proximity_context)
+    prompt = build_chat_prompt(task, question, levels, proximity_context,conversation_history)
     print(prompt)
     
     generated_response = model.generate_text(prompt=prompt)
@@ -234,7 +240,7 @@ def updateLevel(answer, time, level, activity):
         level += score * sensitivity
     else:
         # Slower wrong answers give greater penalty
-        score = (time - 20) / 10 if time > 10 else 0.5
+        score = (time - 20) / 10 if time > 10 else 0.5  # from -.5,...., inf
         level -= score * sensitivity
 
     level = min(max(level, 1), 100)
