@@ -49,7 +49,7 @@ export class VirtualTeacherService {
   async handleUserQuery(createvirtualTeacherDto: CreatevirtualTeacherDto) {
     const { prompt, userId, chatId } = createvirtualTeacherDto;
 
-    const chatbotResponse = await this.getChatbotResponse(prompt, userId, 'ask'); // Default to 'ask' for Virtual Assistant
+    const chatbotResponse = await this.getChatbotResponse(prompt, userId); // Default to 'ask' for Virtual Assistant
 
     const userMessage = {
       text: prompt,
@@ -104,7 +104,7 @@ export class VirtualTeacherService {
     return this.virtualTeacherModel.findOne({ chatId });
   }
 
-  private async getChatbotResponse(prompt: string, userId: string, serviceType: 'ask' ): Promise<string> {
+  private async getChatbotResponse(prompt: string, userId: string): Promise<string> {
     const user = await this.userModel.findById(userId);
     if (!user) throw new Error('User not found');
     
