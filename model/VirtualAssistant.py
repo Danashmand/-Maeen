@@ -360,7 +360,7 @@ def spell_check():
     if not question:
         return jsonify({"error": "No question provided"}), 400
     try:
-        response = chat(question, levels, task="spelling_check", MAX_HISTORY_TURNS=3)
+        response = chat(question, levels, task="spelling_check", MAX_HISTORY_TURNS=0)
         return jsonify({"AI": response})
     except Exception as e:
         print("Error at spell check:", e)
