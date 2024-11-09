@@ -143,6 +143,7 @@ function Page() {
         <h2 className="flex gap-1 text-3xl font-bold" dir="rtl">
           اختبر معرفتك!
         </h2>
+      
       </div>
     </div>
   );

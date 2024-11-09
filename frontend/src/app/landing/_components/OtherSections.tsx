@@ -7,6 +7,8 @@ import Image from 'next/image';
 import { FaLinkedin, FaWhatsapp, FaGithub } from 'react-icons/fa';
 import userPic from '../../public/landing-icons/Userpic.svg';
 import userPic2 from '../../public/landing-icons/Userpic2.svg';
+import hamza from '../../public/images/hamza.png';
+import abdullah from '../../public/images/photo_5870613574123111987_y.jpg';
 const OtherSections = () => {
   return (
     <div className="bg-gradient-to-b from-white to-secondary/70 p-8 rounded-[100px] shadow-lg w-full  mx-auto ">
@@ -90,7 +92,7 @@ const OtherSections = () => {
 <div className="flex flex-col items-center bg-white rounded-3xl shadow-lg p-6 text-center w-60">
       <div className="w-24 h-24 rounded-full overflow-hidden mb-4">
         <Image
-          src={userPic} // Replace with the actual path to the profile image
+          src={userPic} 
           alt="Profile Picture"
           width={96}
           height={96}
@@ -99,11 +101,11 @@ const OtherSections = () => {
       </div>
       <h3 className="text-lg font-bold text-secondary2 mb-2">سلطان بني علي</h3>
       <div className="flex gap-4 text-gray-900">
-        <a href="https://www.linkedin.com/in/username" target="_blank" rel="noopener noreferrer">
+        <a href="https://www.linkedin.com/in/sultanbniali" target="_blank" rel="noopener noreferrer">
           <FaLinkedin size={20} />
         </a>
        
-        <a href="https://github.com/username" target="_blank" rel="noopener noreferrer">
+        <a href="https://github.com/sultanbniali" target="_blank" rel="noopener noreferrer">
           <FaGithub size={20} />
         </a>
       </div>
@@ -111,7 +113,7 @@ const OtherSections = () => {
 <div className="flex flex-col items-center bg-white rounded-3xl shadow-lg p-6 text-center w-60">
       <div className="w-24 h-24 rounded-full overflow-hidden mb-4">
         <Image
-          src={userPic2} // Replace with the actual path to the profile image
+          src={userPic2} 
           alt="Profile Picture"
           width={96}
           height={96}
@@ -124,7 +126,7 @@ const OtherSections = () => {
           <FaLinkedin size={20} />
         </a>
        
-        <a href="https://github.com/username" target="_blank" rel="noopener noreferrer">
+        <a href="https://github.com/alsubaieedaleh" target="_blank" rel="noopener noreferrer">
           <FaGithub size={20} />
         </a>
       </div>
@@ -132,20 +134,20 @@ const OtherSections = () => {
 <div className="flex flex-col items-center bg-white rounded-3xl shadow-lg p-6 text-center w-60">
       <div className="w-24 h-24 rounded-full overflow-hidden mb-4">
         <Image
-          src={userPic2} // Replace with the actual path to the profile image
+          src={hamza} 
           alt="Profile Picture"
           width={96}
           height={96}
-          className="object-cover"
+          className="object-cover rounded-full "
         />
       </div>
       <h3 className="text-lg font-bold text-secondary2 mb-2"> حمزة الشيخي</h3>
       <div className="flex gap-4 text-gray-900">
-        <a href="https://www.linkedin.com/in/username" target="_blank" rel="noopener noreferrer">
+        <a href="https://www.linkedin.com/in/hamza-alshaikhi" target="_blank" rel="noopener noreferrer">
           <FaLinkedin size={20} />
         </a>
        
-        <a href="https://github.com/username" target="_blank" rel="noopener noreferrer">
+        <a href="https://github.com/hamza-26" target="_blank" rel="noopener noreferrer">
           <FaGithub size={20} />
         </a>
       </div>
@@ -153,20 +155,20 @@ const OtherSections = () => {
 <div className="flex flex-col items-center bg-white rounded-3xl shadow-lg p-6 text-center w-60">
       <div className="w-24 h-24 rounded-full overflow-hidden mb-4">
         <Image
-          src={userPic2} // Replace with the actual path to the profile image
+          src={abdullah} 
           alt="Profile Picture"
           width={96}
           height={96}
-          className="object-cover"
+          className="object-cover  "
         />
       </div>
       <h3 className="text-lg font-bold text-secondary2 mb-2">عبدالله الزهراني</h3>
       <div className="flex gap-4 text-gray-900">
-        <a href="https://www.linkedin.com/in/username" target="_blank" rel="noopener noreferrer">
+        <a href="https://www.linkedin.com/in/abdullah-alzahrani" target="_blank" rel="noopener noreferrer">
           <FaLinkedin size={20} />
         </a>
        
-        <a href="https://github.com/username" target="_blank" rel="noopener noreferrer">
+        <a href="https://github.com/ProximaHugu" target="_blank" rel="noopener noreferrer">
           <FaGithub size={20} />
         </a>
       </div>

@@ -15,9 +15,9 @@ interface Question {
 
 // Props for the Exam component
 interface ExamProps {
-    questions: Question[]; // Changed from 'any' to 'Question[]' for better type safety
+    questions: Question[]; 
     showCorrectAnswer: boolean;
-    onComplete: (answer: string) => void;  // Pass the final score as a string
+    onComplete: (answer: number) => void;  // Pass the final score as a string
 }
 
 const Exam: React.FC<ExamProps> = ({ questions, showCorrectAnswer = true, onComplete }) => {
@@ -39,8 +39,8 @@ const Exam: React.FC<ExamProps> = ({ questions, showCorrectAnswer = true, onComp
                 setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
                 setSelectedOption(null);
             } else {
-                // Pass the final score as a string to the parent
-                onComplete((score + (option.correct ? 1 : 0)).toString());
+                // Pass the final score as a number to the parent
+                onComplete(score + (option.correct ? 1 : 0));
             }
         }, 1000);
     };

@@ -7,6 +7,8 @@ import RightSidebar from "@/app/_components/rightSidebar";
 import { useRouter } from "next/navigation";
 import LogoColored from '../../public/logocolored.svg'
 import Face from "../../public/face.svg";
+import face2 from "../../public/images/1500 Memoji Pack.svg"
+
 // import background from '../../public/images/Desktop - 4 (1).png';
 function Page() {
 const [chat, setChat] = useState<{
@@ -290,10 +292,15 @@ const [chat, setChat] = useState<{
 </div>
 
 
-<div className="bg-gradient-to-b from-primary to-secondary2 p-8 rounded-[10%] items-center text-center justify-center flex w-80 mx-4 mt-40 h-2/3">
+<div className="flex flex-col bg-gradient-to-b from-primary to-secondary2 p-8 rounded-[10%] items-center text-center justify-center flex w-80 mx-4 mt-20 h-3/4">
         <h2 className="flex gap-1 text-2xl font-bold" dir="rtl">
-أنا ياقوت معلمك الافتراضي اسألني ما شئت        </h2>
+          أنا ياقوت معلمك الافتراضي اسألني ما شئت !      </h2>
+<div>
+<Image src={face2} alt="face" className="w-52" />
+
+</div>
       </div>
+      
     </div>
   );
 }

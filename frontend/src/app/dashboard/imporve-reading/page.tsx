@@ -7,7 +7,7 @@ import RightSidebar from "@/app/_components/rightSidebar";
 import { useRouter } from "next/navigation";
 import LogoColored from "../../public/logocolored.svg";
 import Face from "../../public/face.svg";
-
+import face2 from "../../public/images/Salman Happy Memoji.svg"
 interface Levels {
   writing: number;
   reading: number;
@@ -180,19 +180,22 @@ function Page() {
           <div ref={messagesEndRef} />
         </div>
 
-        <form onSubmit={handleSubmit} className="flex items-center space-x-4 pt-6">
-        <input type="text" className="flex-grow p-2 text-right rounded-full border-2  border-primary focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition duration-200 ease-in-out text-gray-900 bg-white text-lg leading-relaxed" placeholder="...اسأل شيئًا" value={userInput} onChange={(e) => setUserInput(e.target.value)} />
-  <button type="submit" className="bg-primary text-white rounded-full px-6 py-3 transition duration-200 ease-in-out hover:bg-secondary">
-      إرسال
+        <form onSubmit={handleSubmit} className="flex items-center justify-center space-x-4 pt-6">
+  <button type="submit" className="bg-primary text-white rounded-full px-20 py-3 transition duration-200 ease-in-out hover:bg-secondary">
+      أعطني قصة
     </button>
         </form>
       </div>
       
-<div className="bg-gradient-to-b from-primary to-secondary2  p-8 rounded-[10%] items-center text-center justify-center flex w-80 mx-4 mt-40 h-2/3  ">
+<div className="flex flex-col   bg-gradient-to-b from-primary to-secondary2  p-8 rounded-[10%] items-center text-center justify-center flex w-80 mx-4 mt-20 h-3/4  ">
 
-<h2 className="flex gap-1 text-3xl font-bold" dir="rtl"> 
-القراءة وسيلتك للارتقاء!
-</h2>
+<div className="gap-1 text-3xl font-bold" dir="rtl"> 
+اسأل وسأجيبك بقصة مشوقة ومثيرة!
+</div>
+<div>
+          
+<Image src={face2} alt="face" className="w-52" />
+          </div>
 
 </div>
     </div>
