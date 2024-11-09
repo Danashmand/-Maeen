@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from flask import Flask, request, jsonify, session
 import os
 from ibm_watsonx_ai.foundation_models import Model
@@ -8,6 +9,9 @@ import json
 import chromadb
 import random
 import string
+import json
+import random
+
 
 app = Flask(__name__)
 app.secret_key = '1422'
@@ -221,7 +225,8 @@ def build_chat_prompt(task, question, levels, context, conversation_history):
 def chat(question, levels, task, MAX_HISTORY_TURNS=4):
     
     # print("chat function")
-    conversation_history = session.get("conversation_history", [])
+    if task != "spelling_check":        
+        conversation_history = session.get("conversation_history", [])
     #############################################################################
     proximity_context = proximity_search(question, task)
     prompt = build_chat_prompt(task, question, levels, proximity_context,conversation_history)
@@ -261,34 +266,16 @@ def updateLevel(answer, time, level, activity):
 
 # Function to generate a question based on exam topic and user level
 def getQuestion(levels,topic): 
-    lvl = stringify(levels[topic])
-    role_instruction = '''You are an AI model that generate a quesiton for kids about foundation of arabic language to examine thier level of understanding
-    - the questions should be in arabic and easy to understand
-    - all the questions should be MCQ questions with four choices each 
-    - the correct answer should be the first one
-    - you are given a context about the topic to help you generate the questions
-    - you are also given the shild's level to generate questions based on his level
-    - you must write the question in arabic inside JSON object with the following format:
-    - the question should be releavent to the topic
-    Example of beginner level question:
-    {"question" : "ما هي الفاكهة بين الخيارات التالية؟","answers" : ["التفاح","الكرسي","الكتاب","الهاتف"]}
-    note that the first answer is the correct one
-    Example of expert level question:
-    {"question" : "كيف تكتب كلمة الهمزة في كلمة أزهار؟","answers" : ["على الألف","على السطر","على الياء","على الواو"]}
-    '''
-    inst = base_prompts["question_generation"]
-    prompt = f'''
-    [INST] {inst} [/INST]
-    '''
-    #############################################################################
+    questionData = [{"question":"\"أي من هذه الكلمات تبدأ بحرف (ب)؟\"","level":"beginner","options":[{"id":"1","text":"كتاب","correct":False},{"id":"2","text":"قمر","correct":False},{"id":"3","text":"بطة","correct":True},{"id":"4","text":"سماء","correct":False}]},{"question":"\"أي من هذه الكلمات تُكتب بالتاء المربوطة؟\"","level":"beginner","options":[{"id":"1","text":"شمس","correct":False},{"id":"2","text":"كتاب","correct":False},{"id":"3","text":"مدرسة","correct":True},{"id":"4","text":"عمل","correct":False}]},{"question":"\"أي من هذه الكلمات تحتوي على همزة قطع؟\"","level":"beginner","options":[{"id":"1","text":"بعض","correct":False},{"id":"2","text":"أم","correct":True},{"id":"3","text":"الى","correct":False},{"id":"4","text":"حين","correct":False}]},{"question":"\"أي من هذه الكلمات تبدأ بهمزة وصل؟\"","level":"beginner","options":[{"id":"1","text":"سماء","correct":False},{"id":"2","text":"شجرة","correct":False},{"id":"3","text":"أسد","correct":False},{"id":"4","text":"انتظر","correct":True}]},{"question":"\"أي من هذه الكلمات تنتهي بألف مقصورة؟\"","level":"beginner","options":[{"id":"1","text":"هدى","correct":True},{"id":"2","text":"مدينة","correct":False},{"id":"3","text":"كتاب","correct":False},{"id":"4","text":"صحراء","correct":False}]},{"question":"\"ما هي الكلمة الصحيحة التي تكتب بألف مقصورة؟\"","level":"beginner to intermediate","options":[{"id":"1","text":"رحى","correct":True},{"id":"2","text":"هداء","correct":False},{"id":"3","text":"جمال","correct":False},{"id":"4","text":"صحراء","correct":False}]},{"question":"\"ما الفرق بين التاء المربوطة والمفتوحة في النطق؟\"","level":"beginner to intermediate","options":[{"id":"1","text":"التاء المفتوحة تُنطق ياءً","correct":False},{"id":"2","text":"التاء المربوطة تُنطق هاءً عند الوقف","correct":True},{"id":"3","text":"التاء المفتوحة تُنطق هاءً","correct":False},{"id":"4","text":"التاء المربوطة تُنطق دائمًا تاءً","correct":False}]},{"question":"\"اختر الكلمة التي تبدأ بلام التعريف المدمجة.\"","level":"beginner to intermediate","options":[{"id":"1","text":"بيت","correct":False},{"id":"2","text":"للبيت","correct":True},{"id":"3","text":"سماء","correct":False},{"id":"4","text":"إلى","correct":False}]},{"question":"\"أين تُكتب الهمزة في كلمة (تفاءل)؟\"","level":"beginner to intermediate","options":[{"id":"1","text":"على السطر","correct":True},{"id":"2","text":"على الواو","correct":False},{"id":"3","text":"على الألف","correct":False},{"id":"4","text":"على الياء","correct":False}]},{"question":"\"أي من هذه الكلمات جمع مؤنث سالم؟\"","level":"beginner to intermediate","options":[{"id":"1","text":"معلمات","correct":True},{"id":"2","text":"رجال","correct":False},{"id":"3","text":"مدرسة","correct":False},{"id":"4","text":"كتب","correct":False}]},{"question":"\"اختر الكلمة التي تكون معرفّة بالضمير.\"","level":"intermediate","options":[{"id":"1","text":"كتب","correct":False},{"id":"2","text":"معلم","correct":False},{"id":"3","text":"كتاب","correct":False},{"id":"4","text":"كتابي","correct":True}]},{"question":"\"أي كلمة تتبع قاعدة (الألف المقصورة) في نهاية الاسم الثلاثي؟\"","level":"intermediate","options":[{"id":"1","text":"فتى","correct":True},{"id":"2","text":"قمر","correct":False},{"id":"3","text":"سماء","correct":False},{"id":"4","text":"كتاب","correct":False}]},{"question":"\"ما هو جمع المذكر السالم لكلمة (معلم)؟\"","level":"intermediate","options":[{"id":"1","text":"معلم","correct":False},{"id":"2","text":"معلمين","correct":False},{"id":"3","text":"معلمون","correct":True},{"id":"4","text":"معلمات","correct":False}]},{"question":"\"حدد الكلمة التي تنتهي بألف مقصورة.\"","level":"intermediate","options":[{"id":"1","text":"هدى","correct":True},{"id":"2","text":"سماء","correct":False},{"id":"3","text":"بناء","correct":False},{"id":"4","text":"دعا","correct":False}]},{"question":"\"اختر الكلمة التي تتبع القاعدة (المفعول المطلق).\"","level":"intermediate","options":[{"id":"1","text":"قرأت كتاباً","correct":False},{"id":"2","text":"سافرت كثيراً","correct":False},{"id":"3","text":"ضربت ضرباً","correct":True},{"id":"4","text":"حفظت دروساً","correct":False}]},{"question":"\"اختر الكلمة التي تتبع قاعدة (اسم الفاعل).\"","level":"intermediate to advanced","options":[{"id":"1","text":"كاتب","correct":True},{"id":"2","text":"كتب","correct":False},{"id":"3","text":"كتاب","correct":False},{"id":"4","text":"كتابة","correct":False}]},{"question":"\"ما هو الفعل المضارع المرفوع؟\"","level":"intermediate to advanced","options":[{"id":"1","text":"يكتبُ","correct":True},{"id":"2","text":"كتابةً","correct":False},{"id":"3","text":"كتبَ","correct":False},{"id":"4","text":"كاتب","correct":False}]},{"question":"\"أي كلمة تحتوي على همزة متطرفة؟\"","level":"intermediate to advanced","options":[{"id":"1","text":"قلم","correct":False},{"id":"2","text":"سماء","correct":True},{"id":"3","text":"علم","correct":False},{"id":"4","text":"مأساة","correct":False}]},{"question":"\"ما هي الكلمة التي تُكتب بهمزة القطع في أولها؟\"","level":"intermediate to advanced","options":[{"id":"1","text":"حين","correct":False},{"id":"2","text":"صباح","correct":False},{"id":"3","text":"بعض","correct":False},{"id":"4","text":"أم","correct":True}]},{"question":"\"حدد الكلمة التي تمثل (جمع تكسير).\"","level":"intermediate to advanced","options":[{"id":"1","text":"كتابات","correct":False},{"id":"2","text":"كُتب","correct":False},{"id":"3","text":"كرسي","correct":False},{"id":"4","text":"بيوت","correct":True}]},{"question":"\" اختر الكلمة التي تمثل (المفعول به) في الجملة، كتب المعلم كتاباً.\"","level":"advanced","options":[{"id":"1","text":"درسَ","correct":False},{"id":"2","text":"كتاباً","correct":True},{"id":"3","text":"كتابَ","correct":False},{"id":"4","text":"طالبَ","correct":False}]},{"question":"\"حدد الكلمة التي تُعتبر (اسم مكان).\"","level":"advanced","options":[{"id":"1","text":"كتابة","correct":False},{"id":"2","text":"كاتب","correct":False},{"id":"3","text":"مدرسة","correct":True},{"id":"4","text":"كتاب","correct":False}]},{"question":"\"ما هي الكلمة التي تمثل (اسم زمان)؟\"","level":"advanced","options":[{"id":"1","text":"مدرسة","correct":False},{"id":"2","text":"يوم","correct":True},{"id":"3","text":"كتابة","correct":False},{"id":"4","text":"موعد","correct":False}]},{"question":"\"حدد الكلمة التي تحتوي على همزة متطرفة.\"","level":"advanced","options":[{"id":"1","text":"كتاب","correct":False},{"id":"2","text":"فاكهة","correct":False},{"id":"3","text":"فكرة","correct":False},{"id":"4","text":"بدء","correct":True}]},{"question":"\"أي من الكلمات التالية جمع مؤنث سالم؟\"","level":"advanced","options":[{"id":"1","text":"كتب","correct":False},{"id":"2","text":"معلمين","correct":False},{"id":"3","text":"معلم","correct":False},{"id":"4","text":"معلمات","correct":True}]}]
+    print(levels)
+    level = stringify(levels[topic])
+    filtered_questions = [q  for q in questionData if q["level"] == level]
+    if not filtered_questions:
+        return "No questions available for the specified topic and level."
 
-    proximity_context = proximity_search(topic, "question_generation")
-    prompt += f"Context: {proximity_context}\n"
-    prompt += f"Level: {lvl}\n"
-    prompt += f"Topic: {topic}\n"
-    generated_response = model.generate_text(prompt=prompt)
-    return generated_response
-
+    random_question = random.choice(filtered_questions)
+    return random_question
+ 
 # Function to stringify user level to fed it into the model
 def stringify(level):
     if level < 0:
@@ -404,13 +391,13 @@ def startExam():
     
     
     # example question just for testing the fetch (will be deleted)
-    response =  """ما هو الفعل في الجملة  "يلعب الطفل فالحديقة"
-    - يلعب
-    - الطفل
-    - الحديقة
-    END
-    """
-    levels = data.get("levels", "")
+    # response =  """ما هو الفعل في الجملة  "يلعب الطفل فالحديقة"
+    # - يلعب
+    # - الطفل
+    # - الحديقة
+    # END
+    # """
+    # levels = data.get("levels", "")
     
     return jsonify({"AI": response})
 
@@ -436,13 +423,13 @@ def sendNextQuestion():
     
     
     # example question just for testing the fetch (will be deleted)
-    response =  """ما هو الفعل في الجملة  "يلعب الطفل فالحديقة"
-    - يلعب
-    - الطفل
-    - الحديقة
-    END
-    """
-    levels = data.get("levels", "")
+    # response =  """ما هو الفعل في الجملة  "يلعب الطفل فالحديقة"
+    # - يلعب
+    # - الطفل
+    # - الحديقة
+    # END
+    # """
+    # levels = data.get("levels", "")
         
     
     return jsonify({"AI": response,"levels":levels})
