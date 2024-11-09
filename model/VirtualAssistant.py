@@ -39,8 +39,8 @@ parameters = {
     # "min_new_tokens": 10,
     "max_new_tokens": 900,
     "repetition_penalty": 1,
-    # "temperature": .7,
-    # "top_p": 1.0,
+    # "temperature": .001,
+    "top_p": .50,
     # "top_k": 90,
     # "random_seed": random.randint(1, 12451),
     "stoping_sequence": ["END"]
@@ -81,23 +81,21 @@ task_config = {
 }
 
 base_prompts = {
-    "spelling_check":'''
-        أنت مدقق إملائي باللغة العربية لمتعلمين صغار. مهمتك هي مراجعة كل كلمة في النص الذي يقدمه الطفل للتحقق من الأخطاء الإملائية. اتبع الخطوات التالية:
-        
-        مراجعة كل كلمة: قم بفحص كل المكتوب.
-        
-        إذا كانت الجملة بها خطأ  إملائي، اكتب الكلمة متبوعةً بسبب تصحيحها.
-        
-        التركيز: استجب فقط بتقديم الملاحظات الإملائية كما هو مطلوب، وتجنب أي استجابات إضافية أو استبدال الكلمات بكلمات أخرى.
-        
-        مثال:
-        
-        المدخل: "الطعامو لذيذ"
-        
-        الإخراج: الطعامو - نعم
-        لذيذ - لا
-        
-        الأسلوب: استخدم أسلوباً رسمياً مناسباً ومشجعاً للطفل.''', 
+    "spelling_check":'''you are a dedicated Arabic spellchecker. you should always correct the spelling mistakes in the text and give a brief explanation about it end your answers with "END" keyword
+
+        Input: ذهبت إلى المدرسه.
+        Output: ذهبت إلى المدرسة.
+        END
+
+        Input: أريد أن اذهب إلى المكتبة.
+        Output: أريد أن أذهب إلى المكتبة.
+        END
+
+        Input: الكتاب على الطاولة
+        Output: هذه الجملة صحيحة إملائيا
+        END
+
+        Input: ''', 
     
     
     "question_generation": """ You are an AI that generates an MCQ question with three choices your question should be about the foundation of Arabic language and the correct answer should be the first choice
@@ -208,6 +206,9 @@ def build_chat_prompt(task, question, levels, context, conversation_history):
         lvl = stringify(levels["grammar"])
     elif task == "spelling_check":
         lvl = stringify(levels["writing"])
+        prompt_input = context + f"""{base_prompt}\n\n"""
+        return prompt_input + question + "\nOutput:"
+        
     
     prompt_input = context + f"""<<SYS>>{base_prompt}<</SYS>>\n\n""" 
     for turn in conversation_history:
@@ -324,7 +325,7 @@ You are an Arabic storyteller who writes short, engaging stories with at least 1
 
 IMPORTANT:
 - Tell ONLY ONE story, and do not continue with any additional stories.
-- it should be {level+ 70} words long.
+- you MUST BE ON {level+ 70} words long.
 - Use clear and simple words appropriate for the child’s reading level.
 - End the story with the word "END" and nothing further.
 
@@ -397,6 +398,18 @@ def startExam():
     print(levels)
     topic = data.get("topic", "")
     response = getQuestion(levels, topic)
+    
+    
+    
+    # example question just for testing the fetch (will be deleted)
+    response =  """ما هو الفعل في الجملة  "يلعب الطفل فالحديقة"
+    - يلعب
+    - الطفل
+    - الحديقة
+    END
+    """
+    levels = data.get("levels", "")
+    
     return jsonify({"AI": response})
 
 
@@ -414,11 +427,22 @@ def sendNextQuestion():
     userActivity = data.get("userActivity", "")
     singlevel = updateLevel(answer, time, singlevel, userActivity)
     levels[topic] = singlevel
-    
     if newTopic:
         response = getQuestion(levels, newTopic)
     else:
         response = "Exam finished"
+    
+    
+    # example question just for testing the fetch (will be deleted)
+    response =  """ما هو الفعل في الجملة  "يلعب الطفل فالحديقة"
+    - يلعب
+    - الطفل
+    - الحديقة
+    END
+    """
+    levels = data.get("levels", "")
+        
+    
     return jsonify({"AI": response,"levels":levels})
 
 # For clearing the conversation history
