@@ -351,7 +351,9 @@ Execution Instructions:
                    "temperature" : 0.5,
                    "top_p" : 1.0,
                    "top_k" : 90,
-                   "max_new_tokens" : 900}
+                   "max_new_tokens" : 900,
+                   "stoping_sequence": ["END"]
+                   }
     respons = model.generate_text(prompt=prompt)
     return respons
 #############################################################################
