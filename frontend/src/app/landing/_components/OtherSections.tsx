@@ -4,7 +4,7 @@ import arrow from "../../public/landing-icons/arrow.svg";
 import leaf from "../../public/landing-icons/Leaf.svg";
 import books from "../../public/landing-icons/books.svg";
 import Image from 'next/image';
-import { FaLinkedin, FaWhatsapp, FaGithub } from 'react-icons/fa';
+import { FaLinkedin, FaGithub } from 'react-icons/fa';
 import userPic from '../../public/landing-icons/Userpic.svg';
 import userPic2 from '../../public/landing-icons/Userpic2.svg';
 import hamza from '../../public/images/hamza.png';

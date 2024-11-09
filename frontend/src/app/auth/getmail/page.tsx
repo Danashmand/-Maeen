@@ -10,6 +10,9 @@ function Page() {
   const [error, setError] = useState<string | null>(null);
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(event.target.value);
+    if(error){
+      console.log("error", email);
+    }
     setError(null); 
   };
   const validateEmail = (email: string) => {

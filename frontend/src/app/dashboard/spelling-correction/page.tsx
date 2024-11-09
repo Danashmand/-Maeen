@@ -3,7 +3,6 @@ import React, { useState, useEffect, useRef } from "react";
 import Sidebar from "@/app/_components/sidebar";
 import StudentIcon from "../../public/R.png";
 import Image from "next/image";
-import RightSidebar from "@/app/_components/rightSidebar";
 import { useRouter } from "next/navigation";
 import LogoColored from '../../public/logocolored.svg'
 import Face from "../../public/face.svg";

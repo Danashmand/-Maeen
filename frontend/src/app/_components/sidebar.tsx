@@ -4,14 +4,11 @@ import React from 'react';
 import { useRouter, usePathname } from 'next/navigation'; 
 import Logo from "../public/logo.svg"; 
 import Image, { StaticImageData } from 'next/image';
-import DashboardIcon from '../public/sidebarIcons/dashboard.svg';
-import CashIcon from '../public/sidebarIcons/cash.svg';
 import PencilIcon from '../public/sidebarIcons/pencil.svg';
 import AnnotationIcon from '../public/sidebarIcons/annotation.svg';
 import EqualCircleIcon from "../public/sidebarIcons/equal-circle.svg";
 import VectorIcon from "../public/sidebarIcons/vector.svg";
 import Logout from "../public/sidebarIcons/logout.svg";
-import Face from "../public/face.svg";
 
 const SidebarItem = ({ iconSrc, label, href, isActive }: { iconSrc: StaticImageData, label: string, href?: string, isActive?: boolean }) => (
   <div>
@@ -31,12 +28,8 @@ interface UserData {
   email: string;
 }
 
-interface SidebarProps {
-  userData: UserData | null; // Accept userData as a prop
-}
 
 const Sidebar = () => {
-  const router = useRouter(); 
   const currentPath = usePathname(); 
 
   const sidebarItems = [

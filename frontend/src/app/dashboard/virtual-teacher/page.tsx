@@ -3,7 +3,6 @@ import React, { useState, useEffect, useRef } from "react";
 import Sidebar from "@/app/_components/sidebar";
 import StudentIcon from "../../public/R.png";
 import Image from "next/image";
-import RightSidebar from "@/app/_components/rightSidebar";
 import { useRouter } from "next/navigation";
 import LogoColored from '../../public/logocolored.svg'
 import Face from "../../public/face.svg";
@@ -18,7 +17,6 @@ const [chat, setChat] = useState<{
   const [userInput, setUserInput] = useState("");
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
   const [userData, setUserData] = useState<{ _id: string; name: string; email: string, score: number } | null>(null);
-  const [chatHistory, setChatHistory] = useState<{ id: string; firstMessage: string; date: string }[]>([]);
   const [chatId, setChatId] = useState<string | null>(null);
   const router = useRouter();
   const [colorClass, setColorClass] = useState("text-secondary");
@@ -72,45 +70,7 @@ const [chat, setChat] = useState<{
       createNewChatSession();
     }
   }, [userData]);
-  useEffect(() => {
-    const fetchChatHistory = async () => {
-      if (userData && userData._id) { // Ensure userData and user ID are available
-        try {
-          const response = await fetch(`https://maeen-production.up.railway.app/virtual-teacher/chats/user/${userData._id}`, {
-            method: "GET",
-            headers: { "Content-Type": "application/json" },
-          });
-    
-          if (!response.ok) {
-            throw new Error("Failed to fetch chat history");
-          }
-    
-          const data = await response.json();
-    
-          // Log the data to check its structure
-          
-    
-          // Check if data is an array before mapping
-          if (Array.isArray(data)) {
-            const formattedHistory = data.map((chat) => ({
-              id: chat.chatId,
-              firstMessage: chat.messages[0] ? chat.messages[0].text.substring(0, 12) : 'Blank',
-              date: new Date(chat.createdAt).toLocaleDateString(),
-            })).reverse();
-    
-            setChatHistory(formattedHistory);
-          } else {
-          }
-        } catch (error) {
-          console.error("Error fetching chat history:", error);
-        }
-      }
-    };
-    
-    
 
-    fetchChatHistory();
-  }, [userData, chatId]);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
   
@@ -186,28 +146,7 @@ const [chat, setChat] = useState<{
     }, duration / totalSteps);
   };
   
-  const handleChatClick = async (id: string) => {
-    try {
-      const response = await fetch(`https://maeen-production.up.railway.app/virtual-teacher/${id}`);
-      const chatData = await response.json();
-  
-      const formattedMessages = chatData.messages.map((message: { text: string; source: string; createdAt: Date }) => {
-        return {
-          text: message.text, // Keep the message text
-          source: message.source, // Keep the message source (user or chatbot)
-          createdAt: message.createdAt, // Include createdAt timestamp
-          prompt: message.source === 'user' ? message.text : null, // Keep the prompt if it's from the user
-          answer: message.source === 'chatbot' ? formatResponse(message.text) : null, // Keep the answer if it's from the chatbot
-        };
-      }).filter((message: { prompt: any; answer: any; }) => message.prompt || message.answer); // Filter out messages that are empty
-  
-      setChat(formattedMessages); // Set the chat state with formatted messages
-      scrollToBottom(); // Scroll to bottom after chat click
-
-    } catch (error) {
-      console.error("Error fetching chat data:", error);
-    }
-  };
+ 
   
   
   
@@ -292,7 +231,7 @@ const [chat, setChat] = useState<{
 </div>
 
 
-<div className="flex flex-col bg-gradient-to-b from-primary to-secondary2 p-8 rounded-[10%] items-center text-center justify-center flex w-80 mx-4 mt-20 h-3/4">
+<div className="flex flex-col bg-gradient-to-b from-primary to-secondary2 p-8 rounded-[10%] items-center text-center justify-center flex w-80 mx-4 mt-2 h-3/4">
         <h2 className="flex gap-1 text-2xl font-bold" dir="rtl">
           أنا ياقوت معلمك الافتراضي اسألني ما شئت !      </h2>
 <div>
