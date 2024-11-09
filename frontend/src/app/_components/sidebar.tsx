@@ -1,7 +1,7 @@
 // Sidebar.tsx
 "use client";
 import React from 'react';
-import { useRouter, usePathname } from 'next/navigation'; 
+import { usePathname } from 'next/navigation'; 
 import Logo from "../public/logo.svg"; 
 import Image, { StaticImageData } from 'next/image';
 import PencilIcon from '../public/sidebarIcons/pencil.svg';
@@ -22,11 +22,6 @@ const SidebarItem = ({ iconSrc, label, href, isActive }: { iconSrc: StaticImageD
   </div>
 );
 
-interface UserData {
-  _id: string;
-  name: string;
-  email: string;
-}
 
 
 const Sidebar = () => {
