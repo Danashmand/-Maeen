@@ -249,8 +249,9 @@ const [chat, setChat] = useState<{
           </div>
       </div>
   <Image src={LogoColored} alt="logo" className="w-10"/>
-  <div className="flex justify-center text-center mt-1 ">مدرسك الإفتراضي</div>
+  <div className="flex justify-center text-center mt-1 ">ياقوت</div>
   </div> 
+  {/* <hr className="border-2 border-secondary" /> */}
   
   
    <div className="flex flex-col space-y-2 overflow-y-auto flex-grow bg-white bg-opacity-10 p-6 h-[75vh] backdrop-blur-md transition-transform duration-300 ease-in-out" dir="rtl">
@@ -282,14 +283,17 @@ const [chat, setChat] = useState<{
 
   <form onSubmit={handleSubmit} className="flex items-center space-x-4 pt-6">
     <input type="text" className="flex-grow p-2 text-right rounded-full border-2  border-primary focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition duration-200 ease-in-out text-gray-900 bg-white text-lg leading-relaxed" placeholder="...اسأل شيئًا" value={userInput} onChange={(e) => setUserInput(e.target.value)} />
-    <button type="submit" className="bg-primary text-white rounded-full px-6 py-3 transition duration-200 ease-in-out hover:bg-secondary">
+    <button type="submit" className="bg-primary text-white rounded-full px-6 py-2 transition duration-200 ease-in-out hover:bg-secondary">
       إرسال
     </button>
   </form>
 </div>
 
-  <RightSidebar chatHistory={chatHistory} onChatClick={handleChatClick} />
 
+<div className="bg-gradient-to-b from-primary to-secondary2 p-8 rounded-[10%] items-center text-center justify-center flex w-80 mx-4 mt-40 h-2/3">
+        <h2 className="flex gap-1 text-2xl font-bold" dir="rtl">
+أنا ياقوت معلمك الافتراضي اسألني ما شئت        </h2>
+      </div>
     </div>
   );
 }

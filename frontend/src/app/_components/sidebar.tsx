@@ -39,9 +39,9 @@ const Sidebar = () => {
   const currentPath = usePathname(); 
 
   const sidebarItems = [
-    { icon: VectorIcon, label: "طور قرائتي", href: "/dashboard/imporve-reading" }, 
-    { icon: AnnotationIcon, label: "مدرسك الإفتراضي", href: "/dashboard/virtual-teacher" },
-    { icon: PencilIcon, label: "حسّن إملائك" , href: "/dashboard/spelling-correction" },
+    { icon: VectorIcon, label: "الحكواتي ", href: "/dashboard/imporve-reading" }, 
+    { icon: AnnotationIcon, label: "ياقوت", href: "/dashboard/virtual-teacher" },
+    { icon: PencilIcon, label: "جاسر" , href: "/dashboard/spelling-correction" },
     { icon: EqualCircleIcon, label: "اختبر نفسك" , href: "/dashboard/test-yourself" },
   ];
 

@@ -26,7 +26,7 @@ const OtherSections = () => {
           <h2 className="flex gap-4 text-xl font-semibold text-purple-700 mb-2">
             <Image src={Whatismaeen} alt="whatismaeen" width={50} height={50} />
            <p className="text-secondary2 font-bold text-2xl mt-3">
-             ما هي   &nbsp;
+             ما هو   &nbsp;
              <span className='text-secondary '  >
              مَعِين  
              </span>
@@ -48,18 +48,15 @@ const OtherSections = () => {
           <h2 className="flex gap-4 text-xl font-semibold text-purple-700 mb-2">
             <Image src={leaf} alt="whatismaeen" width={50} height={50} />
            <p className="text-secondary2 font-bold text-2xl mt-3">
-             ما هي   &nbsp;
+            كيف طورنا   &nbsp;
              <span className='text-primary '  >
-             مَعِين  
+             علام  
              </span>
              ؟
             </p>
           </h2>
           <p className="text-gray-600">
-            <b>مَعِين</b> هو منصة تعليمية متطورة تهدف إلى تقديم تجربة تعليم اللغة العربية بشكل مخصص وسهل. 
-            من خلال استخدام تقنيات الذكاء الاصطناعي، نوفر دروسًا تفاعلية، مسارات تعليمية مخصصة،
-            ومحاكاة للمحادثات باللغة العربية، ما يمنح المتعلمين من مختلف المستويات تحسين مهاراتهم
-            بطريقة تتناسب مع احتياجاتهم الخاصة.
+         طورنا ثلاث نسخ من علام لتعليم الأطفال العربية, وهي التالي: الحكواتي و ياقوت وجاسر لحكاية القصص والتعليم المخصص للطفل والتصحيح الإملائي
           </p>
         </div>
             <Image src={arrow} alt="whatismaeen" width={100} height={100} className='mt-20 me-20' />    </div>
@@ -69,18 +66,15 @@ const OtherSections = () => {
          <h2 className="flex gap-4 text-xl font-semibold text-purple-700 mb-2">
            <Image src={Whatismaeen} alt="whatismaeen" width={50} height={50} />
           <p className="text-secondary2 font-bold text-2xl mt-3">
-            ما هي   &nbsp;
+            كيف نقيس مستوى  &nbsp;
             <span className='text-secondary '  >
-            مَعِين  
+            الطفل  
             </span>
             ؟
            </p>
          </h2>
          <p className="text-gray-600">
-           <b>مَعِين</b> هو منصة تعليمية متطورة تهدف إلى تقديم تجربة تعليم اللغة العربية بشكل مخصص وسهل. 
-           من خلال استخدام تقنيات الذكاء الاصطناعي، نوفر دروسًا تفاعلية، مسارات تعليمية مخصصة،
-           ومحاكاة للمحادثات باللغة العربية، ما يمنح المتعلمين من مختلف المستويات تحسين مهاراتهم
-           بطريقة تتناسب مع احتياجاتهم الخاصة.
+         عن طريق اختبار معياري يقيس مستوى الطفل عند بداية استخدامه للبرنامج بحيث نعطي هذه النتائج لعلام ليعطينا اجابات مخصصة لمتوى الطفل.
          </p>
        </div>
        <Image src={books} alt="whatismaeen" width={70} height={70} className='mt-20 me-20 p-2 bg-white  rounded-lg  shadow-md mt-20' />     </div>

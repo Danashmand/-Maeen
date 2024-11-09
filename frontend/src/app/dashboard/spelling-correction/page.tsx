@@ -162,7 +162,7 @@ const handleSubmit = async (e: React.FormEvent) => {
           </div>
       </div>
   <Image src={LogoColored} alt="logo" className="w-10"/>
-  <div className="flex justify-center text-center mt-2">حسن إملائك</div>
+  <div className="flex justify-center text-center mt-2">جاسر</div>
   </div> 
   
   

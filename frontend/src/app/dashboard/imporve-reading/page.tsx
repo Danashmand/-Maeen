@@ -152,7 +152,7 @@ function Page() {
             </div>
           </div>
           <Image src={LogoColored} alt="logo" className="w-10" />
-          <div className="flex justify-center text-center mt-2">طور قرائتي</div>
+          <div className="flex justify-center text-center mt-2"> الحكواتي </div> 
         </div>
         {/* <hr className="border-2 border-secondary" /> */}
 
