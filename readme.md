@@ -1,7 +1,42 @@
-# How to test `VirtualAssistant.py`
 
-- Install the required libraries in your  virtual environment
-remeber to keep it in the .gitignore file
+# What is Maeen: 
+- Maeen is a an AI helper tool based on Allam model by [Sdaia](https://sdaia.gov.sa/ar/default.aspx) that helps the children learn Arabic language foundations in a fun way through characters playing the role of a virtual assistant, a spelling corrector, and a story teller. 
+
+- Maeen always ensures that the content generated is suitable for the child's age and level of understanding through tests that are token by the child to meauser his strengths and weaknesses.
+
+[see project requiments on notion](https://hallowed-copper-ed2.notion.site/Allam-Maeen-Product-Requirement-13887d726ab9809cb393c83093351130)
+
+# How to test Maeen on your local host:
+
+Clone the project
+
+```bash
+  git clone https://github.com/Danashmand/-Maeen/
+```
+
+Go to the project directory
+
+```bash
+  cd -Maeen
+```
+
+Install dependencies
+
+```bash
+  npm install
+```
+
+Start the server
+
+```bash
+  npm run dev
+```
+if you are receiving interal server errors when using an Allam feature you should make sure the AWS server is working and it has the latest version of `model\virtualAssistant.py`
+
+# To whorever works on the backend : 
+- **to test the Allam API (in `model\virtualAssistant.py`) you need:**
+- before running, nstall the required libraries in your  virtual environment
+- remeber to keep it in the .gitignore file
 
 `pip install -r requirements.txt`
 
@@ -17,7 +52,7 @@ run the python code in the terminal
 - you can change prompt by modifying the `ROLE_INSTRUCTION` variable
 - you can change the number of turns stored by `MAX_HISTORY_TURNS` variable 
 
-# variables discription when using the API: 
+### variables discription when using the API: 
 - `levels` : dict of the format: `{"writing": 1-100, "reading": 1-100, "grammar": 1-100}`
 - `topic` one of three: "writing", "reading", "grammar" i.e.( "الإملاء", "القراءة", "القواعد")
 - `question` the user question that is going to the prompt
@@ -29,8 +64,7 @@ run the python code in the terminal
 - `response` the response of the virtual assistant you will find it in data.AI
 - `level` after each question you will get the updated level of user
 
-
-# How to send requests to VirtualAssistant.py
+## How to send requests to VirtualAssistant.py
 
 ### virtaul assistant (المساعد الافتراضي)
 - use `/ask` POST using the following format
@@ -61,7 +95,26 @@ run the python code in the terminal
   "userActivity": 5, 
   "answer" : true} `
 
-### for generating storries (ارو لي قصة)
+### for generating storries (الحكواتي)
 - use `/story` to retreive the story 
 **must pass the levels parameter**
   `"levels" : {"writing": 90.795, "reading": 54, "grammar": 50},`
+
+## Storyteller: 
+tells a story based on the student reading level
+## Spelling check
+should return (good job you are correct if the sentence is free of errors)
+other wise it should return the corrected sentence
+## main virtual assistant
+- should answer the child`s questions based on the Vector index uploaded in the IBM project
+- Is also able to remember the chat history 
+
+
+
+# limitaitions: 
+Allam couldn`t not generate questions based on the level of the student so we are hardcoding it
+
+
+
+
+
